@@ -12,29 +12,29 @@ class CategoryEntity(
 
     val title: String,
 
-    val rootCategoryId: Long,
+    val rootId: Long,
 
-    val parentCategoryId: Long?,
+    val parentId: Long?,
 
     val depth: Int,
 
-    val sortOrderOfSameDepth: Int,
+    val siblingOrder: Int,
 ) : BaseLongIdEntity(id) {
     constructor(category: Category) : this(
         id = category.id,
         title = category.title,
-        rootCategoryId = category.rootCategoryId,
-        parentCategoryId = category.parentCategoryId,
+        rootId = category.rootId,
+        parentId = category.parentId,
         depth = category.depth,
-        sortOrderOfSameDepth = category.sortOrderOfSameDepth,
+        siblingOrder = category.siblingOrder,
     )
 
     fun toDomain() = Category(
         id = id,
         title = title,
-        rootCategoryId = rootCategoryId,
-        parentCategoryId = parentCategoryId,
+        rootId = rootId,
+        parentId = parentId,
         depth = depth,
-        sortOrderOfSameDepth = sortOrderOfSameDepth,
+        siblingOrder = siblingOrder,
     )
 }

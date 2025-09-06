@@ -4,5 +4,6 @@ import org.foameraserblue.shop.domain.category.infrastructure.db.entitiy.Categor
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface CategoryRepository : JpaRepository<CategoryEntity, Long> {
-    fun findAllByRootCategoryId(rootCategoryId: Long): List<CategoryEntity>
+    fun findAllByRootId(rootId: Long): List<CategoryEntity>
+    fun existsByParentIdAndSiblingOrder(parentId: Long?, siblingOrder: Int): Boolean
 }
