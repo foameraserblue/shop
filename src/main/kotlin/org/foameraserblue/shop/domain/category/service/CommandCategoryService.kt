@@ -114,11 +114,11 @@ class CommandCategoryService(
         val oldOrder = category.order
 
         val newParent = categoryAdapter.findById(newParentId)
-        // 1) 이전 부모 그룹에서 제거 보정
+        // 1) 이전 부모 그룹에서 순서 제거 보정
         orderAdjustWhenRemove(oldParentId, oldOrder)
         // 2) 새 부모/순번으로 이동
         category.moveParent(newParent, newOrder)
-        // 3) 새 부모 그룹에서 삽입 보정
+        // 3) 새 부모 그룹에서 순서 삽입 보정
         orderAdjustWhenInsert(category.parentId, category.order)
     }
 
@@ -129,11 +129,11 @@ class CommandCategoryService(
         val oldParentId = category.parentId
         val oldOrder = category.order
 
-        // 1) 현재 부모 그룹에서 제거 보정(기존 위치를 비움)
+        // 1) 현재 부모 그룹에서 순서 제거 보정(기존 위치를 비움)
         orderAdjustWhenRemove(oldParentId, oldOrder)
         // 2) 새 순번으로 이동
         category.updateOrder(newOrder)
-        // 3) 같은 부모(변함 없음) 그룹에서 삽입 보정
+        // 3) 같은 부모(변함 없음) 그룹에서 순서 삽입 보정
         orderAdjustWhenInsert(category.parentId, category.order)
     }
 
