@@ -3,7 +3,7 @@ package org.foameraserblue.shop.domain.category.service.usecase
 import org.foameraserblue.shop.domain.category.domain.Category
 
 interface CommandCategoryUseCase {
-    fun createCategory(title: String, parentId: Long?, siblingOrder: Int): Category
+    fun createCategory(title: String, parentId: Long?): Category
 
     fun updateCategory(id: Long, title: String?): Category
 

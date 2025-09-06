@@ -23,20 +23,21 @@ class Category(
     val siblingOrder: Int,
 ) {
     companion object {
-        fun createForInternalNode(title: String, parentCategory: Category, siblingOrder: Int) = Category(
-            title = title,
-            rootId = parentCategory.rootId,
-            parentId = parentCategory.id,
-            depth = parentCategory.depth + 1,
-            siblingOrder = siblingOrder,
-        )
+        fun createForLeaf(title: String, parentCategory: Category, sameParentAndTopOrderCategory: Category?) =
+            Category(
+                title = title,
+                rootId = parentCategory.rootId,
+                parentId = parentCategory.id,
+                depth = parentCategory.depth + 1,
+                siblingOrder = sameParentAndTopOrderCategory?.siblingOrder?.plus(1) ?: 0,
+            )
 
-        fun createForRoot(title: String, siblingOrder: Int) = Category(
+        fun createForRoot(title: String, topOrderRootCategory: Category?) = Category(
             title = title,
             rootId = 0,
             parentId = null,
             depth = 0,
-            siblingOrder = siblingOrder,
+            siblingOrder = topOrderRootCategory?.siblingOrder?.plus(1) ?: 0,
         )
     }
 

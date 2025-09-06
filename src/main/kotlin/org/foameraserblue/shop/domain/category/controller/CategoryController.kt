@@ -27,7 +27,6 @@ class CategoryController(
             commandCategoryUseCase.createCategory(
                 title = request.title,
                 parentId = request.parentId,
-                siblingOrder = request.siblingOrder
             )
         )
     }

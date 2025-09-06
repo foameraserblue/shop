@@ -31,4 +31,8 @@ class CategoryAdapter(
     fun existsByParentIdAndSiblingOrder(parentId: Long?, siblingOrder: Int): Boolean {
         return categoryRepository.existsByParentIdAndSiblingOrder(parentId, siblingOrder)
     }
+
+    fun findTopByParentIdOrderBySiblingOrderDescOrNull(parentId: Long?): Category? {
+        return categoryRepository.findTopByParentIdOrderBySiblingOrderDesc(parentId)?.toDomain()
+    }
 }

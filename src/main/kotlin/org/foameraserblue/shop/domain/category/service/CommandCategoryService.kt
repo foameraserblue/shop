@@ -14,19 +14,28 @@ class CommandCategoryService(
     override fun createCategory(
         title: String,
         parentId: Long?,
-        siblingOrder: Int,
     ): Category {
         val category = parentId
             ?.let {
                 val parent = categoryAdapter.findById(it)
+                val sameParentAndTopOrderCategory = categoryAdapter
+                    .findTopByParentIdOrderBySiblingOrderDescOrNull(parent.id)
 
-                Category.createForInternalNode(
+                Category.createForLeaf(
                     title = title,
                     parentCategory = parent,
-                    siblingOrder = siblingOrder
+                    sameParentAndTopOrderCategory = sameParentAndTopOrderCategory
                 )
             }
-            ?: Category.createForRoot(title = title, siblingOrder = siblingOrder)
+            ?: run {
+                val topOrderRootCategory = categoryAdapter
+                    .findTopByParentIdOrderBySiblingOrderDescOrNull(null)
+
+                Category.createForRoot(
+                    title = title,
+                    topOrderRootCategory = topOrderRootCategory
+                )
+            }
 
         validateForCreate(category)
 
