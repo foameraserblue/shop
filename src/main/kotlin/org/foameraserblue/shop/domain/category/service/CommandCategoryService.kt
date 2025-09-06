@@ -27,6 +27,7 @@ class CommandCategoryService(
         val saved = categoryAdapter.save(category)
 
         return if (saved.isRoot) {
+            saved.rootIdInitialize()
             categoryAdapter.save(saved)
         } else {
             saved
@@ -107,6 +108,7 @@ class CommandCategoryService(
         val oldOrder = category.order
 
         val newParent = newParentId?.let { categoryAdapter.findById(newParentId) }
+
         // 1) 이전 부모 그룹에서 순서 제거 보정
         orderAdjustWhenRemove(oldParentId, oldOrder)
         // 2) 새 부모/순번으로 이동

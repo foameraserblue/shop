@@ -44,10 +44,6 @@ class Category(
 
     init {
         validateDepthAndOrder()
-
-        rootIdInitialize()
-
-        validateRootConsistency()
         validateDepthAndParentId()
     }
 
@@ -57,25 +53,6 @@ class Category(
     private fun validateDepthAndOrder() {
         require(this.depth >= 0) { "depth 는 음수가 될 수 없습니다." }
         require(this.order >= 0) { "order 는 음수가 될 수 없습니다." }
-    }
-
-    private fun rootIdInitialize() {
-        if (isRootIdUninitialized()) {
-            this.rootId = this.id
-        }
-    }
-
-    private fun isRootIdUninitialized(): Boolean = this.id > 0 && this.rootId == 0L
-
-    /**
-     * 루트 카테고리의 rootId 일관성 검증.
-     * - 루트이고 이미 영속된(id > 0) 상태의 경우: rootId == id 이어야 한다.
-     */
-    private fun validateRootConsistency() {
-        if (this.isRoot && this.id > 0) {
-
-            require(this.id == this.rootId) { "루트 카테고리의 rootId 는 자기 자신의 id 여야합니다." }
-        }
     }
 
     private fun validateDepthAndParentId() {
@@ -88,6 +65,11 @@ class Category(
         }
     }
 
+    fun rootIdInitialize() {
+        if (this.isRoot) {
+            this.rootId = this.id
+        }
+    }
 
     fun update(title: String) = apply {
         this.title = title
