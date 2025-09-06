@@ -31,8 +31,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.1")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.1")
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:5.9.1")
 
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12")
 }
