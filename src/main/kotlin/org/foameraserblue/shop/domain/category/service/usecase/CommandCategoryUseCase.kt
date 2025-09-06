@@ -3,18 +3,15 @@ package org.foameraserblue.shop.domain.category.service.usecase
 import org.foameraserblue.shop.domain.category.domain.Category
 
 interface CommandCategoryUseCase {
-    fun createCategory(title: String, parentId: Long?): Category
+    fun create(title: String, parentId: Long?): Category
 
-    fun updateCategory(id: Long, title: String): Category
+    fun update(id: Long, title: String): Category
 
-    // 위치변경 : 뎁스 이동, 같은 뎁스내의 순서이동, vo 만들까,,
-    fun moveCategoryLocation(
+    fun moveLocation(
         id: Long,
-        fromParentId: Long?,
-        toParentId: Long?,
-        fromSiblingOrder: Int?,
-        toSiblingOrder: Int?,
+        newParentId: Long?,
+        newOrder: Int?,
     ): Category
 
-    fun deleteCategory(id: Long)
+    fun delete(id: Long)
 }

@@ -7,13 +7,13 @@ data class CategoryResponse (
     val title: String,
     val parentId: Long?,
     val depth: Int,
-    val siblingOrder: Int,
+    val order: Int,
 ){
     constructor(category: Category): this(
         id = category.id,
         title = category.title,
         parentId = category.parentId,
         depth = category.depth,
-        siblingOrder = category.siblingOrder,
+        order = category.order,
     )
 }

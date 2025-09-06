@@ -15,12 +15,12 @@ class Category(
      */
     var rootId: Long,
 
-    val parentId: Long?,
+    var parentId: Long?,
 
-    val depth: Int,
+    var depth: Int,
 
     // 형제노드끼리의 순서(현 시점에선 화면 출력에 이용함)
-    val siblingOrder: Int,
+    var order: Int,
 ) {
     companion object {
         fun createForLeaf(title: String, parentCategory: Category, sameParentAndTopOrderCategory: Category?) =
@@ -28,21 +28,22 @@ class Category(
                 title = title,
                 rootId = parentCategory.rootId,
                 parentId = parentCategory.id,
-                depth = parentCategory.depth + 1,
-                siblingOrder = sameParentAndTopOrderCategory?.siblingOrder?.plus(1) ?: 0,
+                depth = parentCategory.depth.plus(1),
+                order = sameParentAndTopOrderCategory?.order?.plus(1) ?: 0,
             )
 
-        fun createForRoot(title: String, topOrderRootCategory: Category?) = Category(
-            title = title,
-            rootId = 0,
-            parentId = null,
-            depth = 0,
-            siblingOrder = topOrderRootCategory?.siblingOrder?.plus(1) ?: 0,
-        )
+        fun createForRoot(title: String, topOrderRootCategory: Category?) =
+            Category(
+                title = title,
+                rootId = 0,
+                parentId = null,
+                depth = 0,
+                order = topOrderRootCategory?.order?.plus(1) ?: 0,
+            )
     }
 
     init {
-        validateDepthAndSiblingOrder()
+        validateDepthAndOrder()
 
         rootIdInitialize()
 
@@ -53,9 +54,9 @@ class Category(
     val isRoot: Boolean
         get() = depth == 0
 
-    private fun validateDepthAndSiblingOrder() {
+    private fun validateDepthAndOrder() {
         require(this.depth >= 0) { "depth 는 음수가 될 수 없습니다." }
-        require(this.siblingOrder >= 0) { "siblingOrder 는 음수가 될 수 없습니다." }
+        require(this.order >= 0) { "order 는 음수가 될 수 없습니다." }
     }
 
     private fun rootIdInitialize() {
@@ -88,8 +89,27 @@ class Category(
     }
 
 
-    fun update(title:String) =apply {
+    fun update(title: String) = apply {
         this.title = title
+    }
+
+    fun updateOrder(order: Int) = apply {
+        this.order = order
+    }
+
+    fun moveToLeft() = apply {
+        this.order = order.minus(1)
+    }
+
+    fun moveToRight() = apply {
+        this.order = order.plus(1)
+    }
+
+    fun moveParent(parent: Category, newOrder: Int) = apply {
+        this.rootId = parent.rootId
+        this.parentId = parent.id
+        this.depth = parent.depth.plus(1)
+        this.order = newOrder
     }
 }
 

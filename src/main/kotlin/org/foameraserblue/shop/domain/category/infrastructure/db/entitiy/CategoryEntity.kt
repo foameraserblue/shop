@@ -18,7 +18,7 @@ class CategoryEntity(
 
     val depth: Int,
 
-    val siblingOrder: Int,
+    val order: Int,
 ) : BaseLongIdEntity(id) {
     constructor(category: Category) : this(
         id = category.id,
@@ -26,7 +26,7 @@ class CategoryEntity(
         rootId = category.rootId,
         parentId = category.parentId,
         depth = category.depth,
-        siblingOrder = category.siblingOrder,
+        order = category.order,
     )
 
     fun toDomain() = Category(
@@ -35,6 +35,6 @@ class CategoryEntity(
         rootId = rootId,
         parentId = parentId,
         depth = depth,
-        siblingOrder = siblingOrder,
+        order = order,
     )
 }

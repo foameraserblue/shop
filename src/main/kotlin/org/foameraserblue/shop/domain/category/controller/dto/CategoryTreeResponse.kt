@@ -7,17 +7,17 @@ data class CategoryTreeResponse(
 ) {
     companion object {
         fun toDto(categories: List<Category>): CategoryTreeResponse {
-            // 부모별 자식 목록 매핑 (정렬: depth -> siblingOrder 가정)
+            // 부모별 자식 목록 매핑 (정렬: depth -> order 가정)
             val childrenByParentId: Map<Long?, List<Category>> =
                 categories
-                    .sortedWith(compareBy<Category> { it.depth }.thenBy { it.siblingOrder })
+                    .sortedWith(compareBy<Category> { it.depth }.thenBy { it.order })
                     .groupBy { it.parentId }
 
-            fun buildItem(category: Category): CategoryItemResponse {
+            fun buildItem(category: Category): CategoryData.CategoryItemResponse {
                 val children = childrenByParentId[category.id].orEmpty()
                 val childItems = children.map { buildItem(it) }
 
-                return CategoryItemResponse(
+                return CategoryData.CategoryItemResponse(
                     categoryCode = category.id.toString(),
                     categoryTitle = category.title,
                     hasSubCategory = childItems.isNotEmpty(),
@@ -39,16 +39,16 @@ data class CategoryTreeResponse(
             )
         }
     }
+
+    data class CategoryData(
+        val list: List<CategoryItemResponse>
+    ) {
+        data class CategoryItemResponse(
+            val categoryCode: String,
+            val categoryTitle: String,
+            val hasSubCategory: Boolean,
+            val parentCategoryCode: String,
+            val categoryList: List<CategoryItemResponse>
+        )
+    }
 }
-
-data class CategoryData(
-    val list: List<CategoryItemResponse>
-)
-
-data class CategoryItemResponse(
-    val categoryCode: String,
-    val categoryTitle: String,
-    val hasSubCategory: Boolean,
-    val parentCategoryCode: String,
-    val categoryList: List<CategoryItemResponse>
-)

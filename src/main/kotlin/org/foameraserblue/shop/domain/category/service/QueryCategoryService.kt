@@ -15,14 +15,14 @@ class QueryCategoryService(
         return categoryAdapter.findAll()
     }
 
-    override fun getAllWithChildrenNodeById(id: Long): List<Category> {
+    override fun getAllWithChildrenById(id: Long): List<Category> {
         val category = categoryAdapter.findById(id)
         val sameRootCategories = categoryAdapter.findAllByRootId(category.rootId)
 
         return sameRootCategories.filter { it.depth >= category.depth }
     }
 
-    override fun getAllRootWithChildrenNodeById(id: Long): List<Category> {
+    override fun getAllRootWithChildrenById(id: Long): List<Category> {
         val category = categoryAdapter.findById(id)
 
         return categoryAdapter.findAllByRootId(category.rootId)

@@ -17,7 +17,7 @@ class CategoryTest : BehaviorSpec({
                         rootId = 10L,
                         parentId = null,
                         depth = 0,
-                        siblingOrder = 0
+                        order = 0
                     )
                 }
             }
@@ -32,7 +32,7 @@ class CategoryTest : BehaviorSpec({
                         rootId = 999L,
                         parentId = null,
                         depth = 0,
-                        siblingOrder = 0
+                        order = 0
                     )
                 }
             }
@@ -47,7 +47,7 @@ class CategoryTest : BehaviorSpec({
                         rootId = 0L,
                         parentId = null,
                         depth = 0,
-                        siblingOrder = 0
+                        order = 0
                     )
                 }
             }
@@ -62,7 +62,7 @@ class CategoryTest : BehaviorSpec({
                         rootId = 1L,
                         parentId = 999L,
                         depth = 0,
-                        siblingOrder = 0
+                        order = 0
                     )
                 }
 
@@ -73,7 +73,7 @@ class CategoryTest : BehaviorSpec({
                         rootId = 1L,
                         parentId = null,
                         depth = 2,
-                        siblingOrder = 0
+                        order = 0
                     )
                 }
             }
@@ -91,7 +91,7 @@ class CategoryTest : BehaviorSpec({
                         rootId = 1L,
                         parentId = null,
                         depth = 1,
-                        siblingOrder = 0
+                        order = 0
                     )
                 }
 
@@ -102,7 +102,7 @@ class CategoryTest : BehaviorSpec({
                         rootId = 1L,
                         parentId = 1L,
                         depth = 0,
-                        siblingOrder = 0
+                        order = 0
                     )
                 }
             }
@@ -117,7 +117,7 @@ class CategoryTest : BehaviorSpec({
                         rootId = 1L,
                         parentId = 100L,
                         depth = 2,
-                        siblingOrder = 3
+                        order = 3
                     )
                 }
             }
@@ -134,7 +134,7 @@ class CategoryTest : BehaviorSpec({
                         rootId = 1L,
                         parentId = null,
                         depth = -1,
-                        siblingOrder = 0
+                        order = 0
                     )
                 }
             }

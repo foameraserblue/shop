@@ -8,31 +8,43 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class CategoryAdapter(
-    private val categoryRepository: CategoryRepository
+    private val categoryJpaRepository: CategoryJpaRepository,
 ) {
+    fun save(category: Category): Category {
+        return categoryJpaRepository.save(CategoryEntity(category)).toDomain()
+    }
+
+    fun saveAll(categories: List<Category>): List<Category> {
+        return categoryJpaRepository.saveAll(categories.map { CategoryEntity(it) }).map { it.toDomain() }
+    }
+
     fun findById(id: Long): Category {
-        return categoryRepository.findByIdOrNull(id)
+        return categoryJpaRepository.findByIdOrNull(id)
             ?.toDomain()
             ?: throw NotFoundException("$id ID의 카테고리가 존재하지않습니다.")
     }
 
     fun findAllByRootId(rootId: Long): List<Category> {
-        return categoryRepository.findAllByRootId(rootId).map { it.toDomain() }
+        return categoryJpaRepository.findAllByRootId(rootId).map { it.toDomain() }
     }
 
     fun findAll(): List<Category> {
-        return categoryRepository.findAll().map { it.toDomain() }
+        return categoryJpaRepository.findAll().map { it.toDomain() }
     }
 
-    fun save(category: Category): Category {
-        return categoryRepository.save(CategoryEntity(category)).toDomain()
+    fun existsByParentIdAndOrder(parentId: Long?, order: Int): Boolean {
+        return categoryJpaRepository.existsByParentIdAndOrder(parentId, order)
     }
 
-    fun existsByParentIdAndSiblingOrder(parentId: Long?, siblingOrder: Int): Boolean {
-        return categoryRepository.existsByParentIdAndSiblingOrder(parentId, siblingOrder)
+    fun findTopByParentIdOrderByOrderDescOrNull(parentId: Long?): Category? {
+        return categoryJpaRepository.findTopByParentIdOrderByOrderDesc(parentId)?.toDomain()
     }
 
-    fun findTopByParentIdOrderBySiblingOrderDescOrNull(parentId: Long?): Category? {
-        return categoryRepository.findTopByParentIdOrderBySiblingOrderDesc(parentId)?.toDomain()
+    fun deleteById(id: Long) {
+        categoryJpaRepository.deleteById(id)
+    }
+
+    fun findAllByParentId(parentId: Long?): List<Category> {
+        return categoryJpaRepository.findAllByParentId(parentId).map { it.toDomain() }
     }
 }
