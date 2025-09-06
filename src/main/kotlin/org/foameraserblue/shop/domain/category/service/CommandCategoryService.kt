@@ -41,7 +41,7 @@ class CommandCategoryService(
 
         val saved = categoryAdapter.save(category)
 
-        return if (saved.isRoot()) {
+        return if (saved.isRoot) {
             categoryAdapter.save(saved)
         } else {
             saved
@@ -60,9 +60,12 @@ class CommandCategoryService(
 
     override fun updateCategory(
         id: Long,
-        title: String?
+        title: String
     ): Category {
-        TODO("Not yet implemented")
+        val category = categoryAdapter.findById(id)
+        category.update(title)
+
+        return categoryAdapter.save(category)
     }
 
     override fun moveCategoryLocation(

@@ -4,7 +4,7 @@ package org.foameraserblue.shop.domain.category.domain
 class Category(
     val id: Long = 0,
 
-    val title: String,
+    var title: String,
 
     /**
      * parent 와 children 을 연관관계로 갖고있는 방식에선 N+1 문제를 해결하기 힘듬
@@ -50,6 +50,9 @@ class Category(
         validateDepthAndParentId()
     }
 
+    val isRoot: Boolean
+        get() = depth == 0
+
     private fun validateDepthAndSiblingOrder() {
         require(this.depth >= 0) { "depth 는 음수가 될 수 없습니다." }
         require(this.siblingOrder >= 0) { "siblingOrder 는 음수가 될 수 없습니다." }
@@ -68,14 +71,14 @@ class Category(
      * - 루트이고 이미 영속된(id > 0) 상태의 경우: rootId == id 이어야 한다.
      */
     private fun validateRootConsistency() {
-        if (isRoot() && this.id > 0) {
+        if (this.isRoot && this.id > 0) {
 
             require(this.id == this.rootId) { "루트 카테고리의 rootId 는 자기 자신의 id 여야합니다." }
         }
     }
 
     private fun validateDepthAndParentId() {
-        if (isRoot()) {
+        if (this.isRoot) {
             require(this.depth == 0) { "루트 카테고리의 depth 는 0 이어야 합니다." }
             require(this.parentId == null) { "루트 카테고리는 부모 카테고리를 가질 수 없습니다." }
         } else {
@@ -84,7 +87,10 @@ class Category(
         }
     }
 
-    fun isRoot(): Boolean = depth == 0
+
+    fun update(title:String) =apply {
+        this.title = title
+    }
 }
 
 
