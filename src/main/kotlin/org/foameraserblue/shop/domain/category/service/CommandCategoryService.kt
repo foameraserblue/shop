@@ -88,7 +88,7 @@ class CommandCategoryService(
             }
 
             // 부모만 변경(순번은 새 부모의 맨 뒤)
-            (newParentId != null) -> {
+            (category.parentId != newParentId) -> {
                 val sameParentAndTopOrderCategory =
                     categoryAdapter.findTopByParentIdOrderByOrderDescOrNull(newParentId)
                 moveParent(category, newParentId, sameParentAndTopOrderCategory?.order?.plus(1) ?: 0)
@@ -107,13 +107,13 @@ class CommandCategoryService(
 
     private fun moveParent(
         category: Category,
-        newParentId: Long,
+        newParentId: Long?,
         newOrder: Int,
     ) {
         val oldParentId = category.parentId
         val oldOrder = category.order
 
-        val newParent = categoryAdapter.findById(newParentId)
+        val newParent = newParentId?.let { categoryAdapter.findById(newParentId) }
         // 1) 이전 부모 그룹에서 순서 제거 보정
         orderAdjustWhenRemove(oldParentId, oldOrder)
         // 2) 새 부모/순번으로 이동

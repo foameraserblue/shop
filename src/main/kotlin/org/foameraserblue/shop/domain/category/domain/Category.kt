@@ -105,10 +105,10 @@ class Category(
         this.order = order.plus(1)
     }
 
-    fun moveParent(parent: Category, newOrder: Int) = apply {
-        this.rootId = parent.rootId
-        this.parentId = parent.id
-        this.depth = parent.depth.plus(1)
+    fun moveParent(parent: Category?, newOrder: Int) = apply {
+        this.rootId = parent?.rootId ?: this.id
+        this.parentId = parent?.id
+        this.depth = parent?.depth?.plus(1) ?: 0
         this.order = newOrder
     }
 }
