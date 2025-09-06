@@ -34,7 +34,7 @@ class CategoryController(
         return CategoryResponse(commandCategoryUseCase.update(id, request.title))
     }
 
-    @PatchMapping("{id}/location")
+    @PutMapping("{id}/location")
     fun moveLocation(
         @PathVariable id: Long,
         @RequestBody request: MoveLocationCategoryRequest,

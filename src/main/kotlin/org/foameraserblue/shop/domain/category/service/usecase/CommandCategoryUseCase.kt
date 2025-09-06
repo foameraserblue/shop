@@ -10,7 +10,7 @@ interface CommandCategoryUseCase {
     fun moveLocation(
         id: Long,
         newParentId: Long?,
-        newOrder: Int?,
+        newOrder: Int,
     ): Category
 
     fun delete(id: Long)
