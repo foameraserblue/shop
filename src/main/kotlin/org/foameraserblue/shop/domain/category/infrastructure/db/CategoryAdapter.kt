@@ -24,8 +24,8 @@ class CategoryAdapter(
             ?: throw NotFoundException("$id ID의 카테고리가 존재하지않습니다.")
     }
 
-    fun findAllByRootId(rootId: Long): List<Category> {
-        return categoryJpaRepository.findAllByRootId(rootId).map { it.toDomain() }
+    fun findAllByRootIdAndDepthGreaterThanEqual(rootId: Long, depth: Int): List<Category> {
+        return categoryJpaRepository.findAllByRootIdAndDepthGreaterThanEqual(rootId, depth).map { it.toDomain() }
     }
 
     fun findAll(): List<Category> {

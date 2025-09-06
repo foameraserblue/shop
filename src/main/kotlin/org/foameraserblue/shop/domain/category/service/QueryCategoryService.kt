@@ -17,14 +17,6 @@ class QueryCategoryService(
 
     override fun getAllWithChildrenById(id: Long): List<Category> {
         val category = categoryAdapter.findById(id)
-        val sameRootCategories = categoryAdapter.findAllByRootId(category.rootId)
-
-        return sameRootCategories.filter { it.depth >= category.depth }
-    }
-
-    override fun getAllRootWithChildrenById(id: Long): List<Category> {
-        val category = categoryAdapter.findById(id)
-
-        return categoryAdapter.findAllByRootId(category.rootId)
+        return categoryAdapter.findAllByRootIdAndDepthGreaterThanEqual(category.rootId, category.depth)
     }
 }

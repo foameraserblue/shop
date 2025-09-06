@@ -6,6 +6,4 @@ interface QueryCategoryUseCase {
     fun getAll(): List<Category>
 
     fun getAllWithChildrenById(id: Long): List<Category>
-
-    fun getAllRootWithChildrenById(id: Long): List<Category>
 }

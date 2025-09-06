@@ -17,7 +17,7 @@ import org.springframework.data.jpa.repository.JpaRepository
  * 하지만 API 로 변경할수 있다는 가정하에, 여러 스레드에서 동시에 변경했을때를 위해 락을 걸어야될수도.
  */
 interface CategoryJpaRepository : JpaRepository<CategoryEntity, Long> {
-    fun findAllByRootId(rootId: Long): List<CategoryEntity>
+    fun findAllByRootIdAndDepthGreaterThanEqual(rootId: Long, depth: Int): List<CategoryEntity>
 
     fun existsByParentIdAndOrder(parentId: Long?, order: Int): Boolean
 
