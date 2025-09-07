@@ -17,28 +17,20 @@ class CommandCategoryService(
         title: String,
         code: String,
     ): Category {
-        val category =
-            if (parentCode != null) {
-                // 리프 카테고리 생성 조건
+        val category = parentCode
+            // 리프 카테고리 생성 조건
+            ?.let {
                 val parent = categoryAdapter.findByCode(parentCode)
 
                 Category.createForLeaf(parent = parent, title = title, code = code)
-            } else {
-                // 루트 카테고리 생성조건
-                Category.createForRoot(title = title, code = code)
             }
+        // 루트 카테고리 생성조건
+            ?: Category.createForRoot(title = title, code = code)
 
-        validateForCreate(category)
+
+        validateCode(category.code)
 
         return categoryAdapter.save(category)
-    }
-
-    private fun validateForCreate(category: Category) {
-        require(
-            !categoryAdapter.existsByCode(
-                category.code
-            )
-        ) { "이미 해당 code로 저장된 데이터가 존재합니다." }
     }
 
     override fun patch(
@@ -49,14 +41,27 @@ class CommandCategoryService(
         val category = categoryAdapter.findByCode(code)
 
         if (newCode != null) {
-            val oldCode = category.code
-            val children = categoryAdapter.findAllByParentCode(oldCode)
-
-            // 타켓 카테고리의 코드 변경시 인접한 자식의 parentCode를 다 변경해줍니다.
-            categoryAdapter.saveAll(children.onEach { it.updateParentCode(code) })
+            validateCode(newCode)
+            updateParentCodeOfChildren(category, newCode)
         }
 
-        return categoryAdapter.save(category.patch(title, code))
+        return categoryAdapter.save(category.patch(title, newCode))
+    }
+
+    private fun validateCode(code: String) {
+        require(
+            !categoryAdapter.existsByCode(
+                code
+            )
+        ) { "이미 해당 code로 저장된 데이터가 존재합니다." }
+    }
+
+    private fun updateParentCodeOfChildren(category: Category, newParentCode: String) {
+        val oldCode = category.code
+        val children = categoryAdapter.findAllByParentCode(oldCode)
+
+        // 타켓 카테고리의 코드 변경시 인접한 자식의 parentCode를 다 변경해줍니다.
+        categoryAdapter.saveAll(children.onEach { it.updateParentCode(newParentCode) })
     }
 
     override fun moveParent(
@@ -65,41 +70,50 @@ class CommandCategoryService(
     ): Category {
         val category = categoryAdapter.findByCode(code)
 
-        // 하위 루트아이디 다 바꿔줘야함.
-        if (category.parentCode != newParentCode) {
-            val oldRootCode = category.rootCode
-            val oldDepth = category.depth
-
-            // 새로운 parent 를 찾습니다. parent 가 없으면 루트 카테고리가 된다는 의미입니다.
-            val newParentOrNull = categoryAdapter.findByCodeOrNull(newParentCode)
-            category.moveParent(newParentOrNull)
-
-            // 타겟 카테고리의 하위 카테고리를 전부 가져옵니다.
-            val meAndUnderDepthCategory =
-                categoryAdapter.findAllByRootCodeAndDepthGreaterThanEqual(oldRootCode, oldDepth)
-            val allChildren = CategoryTree.getAllMeAndChildrenList(meAndUnderDepthCategory, category.code)
-                .filter { it.id != category.id }
-
-            // 하위 카테고리의 위치와 연결을 부모에 맞게 변경해줍니다.
-            categoryAdapter.saveAll(
-                allChildren
-                    .onEach { it.moveParent(category) }
-            )
+        if (category.parentCode == newParentCode) {
+            return category
         }
 
+        val oldDepth = category.depth
+
+        // 새로운 parent 를 찾습니다.(null이면 루트로 이동)
+        val newParentOrNull = categoryAdapter.findByCodeOrNull(newParentCode)
+        // 타겟 카테고리의 후손을 찾습니다.
+        val descendants = getDescendants(category)
+        require(!descendants.any { it.code == newParentCode }) {
+            "자기 후손의 하위카테고리로 이동할 수 없습니다."
+        }
+
+        category.moveParent(newParentOrNull)
+
+        // 자손들을, 부모가 이동한 만큼 depth 를 이동시키고, rootCode 를 보정합니다.
+        val depthGap = category.depth - oldDepth
+        descendants.forEach { child ->
+            child.moveWithParent(category.rootCode, depthGap)
+        }
+
+        categoryAdapter.saveAll(descendants)
         return categoryAdapter.save(category)
+    }
+
+    private fun getDescendants(category: Category): List<Category> {
+        val candidates =
+            categoryAdapter.findAllByRootCodeAndDepthGreaterThanEqual(category.rootCode, category.depth)
+        return CategoryTree
+            .getAllMeAndDescendantsList(candidates, category.code)
+            .filter { it.id != category.id }
     }
 
     override fun delete(code: String) {
         val category = categoryAdapter.findByCode(code)
 
         // 타겟 타케고리와 하위의 모든 카테고리를 가져옵니다. 하위의 카테고리는 같은 root 를 공유하지만, 다른 부모를 가진 카테고리도 포함됩니다.
-        val meAndUnderDepthCategory =
+        val candidates =
             categoryAdapter.findAllByRootCodeAndDepthGreaterThanEqual(category.rootCode, category.depth)
 
         // 타켓 카테고리와 하위의 모든 카테고리를 List 형태로 가져옵니다.
-        val meAndAllChildren = CategoryTree.getAllMeAndChildrenList(meAndUnderDepthCategory, category.code)
+        val meAndAllDescendants = CategoryTree.getAllMeAndDescendantsList(candidates, category.code)
 
-        categoryAdapter.deleteAll(meAndAllChildren)
+        categoryAdapter.deleteAll(meAndAllDescendants)
     }
 }

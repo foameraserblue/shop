@@ -90,6 +90,11 @@ class Category(
         this.parentCode = newParentCode
     }
 
+    fun moveWithParent(newRootCode: String, depthGap: Int) = apply {
+        this.rootCode = newRootCode
+        this.depth += depthGap
+    }
+
     // 바뀐 parent 에 맞게 연결관계 및 depth 를 변경해줍니다.
     fun moveParent(newParent: Category?) = apply {
         this.rootCode = newParent?.rootCode ?: this.code

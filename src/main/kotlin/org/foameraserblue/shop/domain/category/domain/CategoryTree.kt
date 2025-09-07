@@ -7,7 +7,7 @@ data class CategoryTree(
 ) {
     companion object {
         // 특정 code 의 카테고리를 포함하여 하위 카테고리를 리스트 형태로 반환합니다.
-        fun getAllMeAndChildrenList(categories: List<Category>, code: String): List<Category> {
+        fun getAllMeAndDescendantsList(categories: List<Category>, code: String): List<Category> {
             val childrenByParentCode: Map<String?, List<Category>> =
                 categories
                     .groupBy { it.parentCode }
@@ -20,7 +20,7 @@ data class CategoryTree(
         }
 
         // 특정 code 의 카테고리를 포함하여 하위 카테고리를 전부 반환합니다.
-        fun getAllMeAndChildrenTree(categories: List<Category>, code: String): CategoryTree {
+        fun getAllMeAndDescendantsTree(categories: List<Category>, code: String): CategoryTree {
             val childrenByParentCode: Map<String?, List<Category>> =
                 categories
                     .groupBy { it.parentCode }
