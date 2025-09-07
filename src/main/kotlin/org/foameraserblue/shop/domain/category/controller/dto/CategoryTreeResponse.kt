@@ -7,10 +7,9 @@ data class CategoryTreeResponse(
 ) {
     companion object {
         fun toDto(categories: List<Category>): CategoryTreeResponse {
-            // 부모별 자식 목록 매핑 (정렬: depth -> order 가정)
             val childrenByParentId: Map<Long?, List<Category>> =
                 categories
-                    .sortedWith(compareBy<Category> { it.depth }.thenBy { it.order })
+                    .sortedWith(compareBy { it.depth })
                     .groupBy { it.parentId }
 
             fun buildItem(category: Category): CategoryData.CategoryItemResponse {

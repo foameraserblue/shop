@@ -14,10 +14,6 @@ class CategoryAdapter(
         return categoryJpaRepository.save(CategoryEntity(category)).toDomain()
     }
 
-    fun saveAll(categories: List<Category>): List<Category> {
-        return categoryJpaRepository.saveAll(categories.map { CategoryEntity(it) }).map { it.toDomain() }
-    }
-
     fun findById(id: Long): Category {
         return categoryJpaRepository.findByIdOrNull(id)
             ?.toDomain()
@@ -32,19 +28,8 @@ class CategoryAdapter(
         return categoryJpaRepository.findAll().map { it.toDomain() }
     }
 
-    fun existsByParentIdAndOrder(parentId: Long?, order: Int): Boolean {
-        return categoryJpaRepository.existsByParentIdAndOrder(parentId, order)
-    }
 
-    fun findTopByParentIdOrderByOrderDescOrNull(parentId: Long?): Category? {
-        return categoryJpaRepository.findTopByParentIdOrderByOrderDesc(parentId)?.toDomain()
-    }
-
-    fun deleteById(id: Long) {
-        categoryJpaRepository.deleteById(id)
-    }
-
-    fun findAllByParentId(parentId: Long?): List<Category> {
-        return categoryJpaRepository.findAllByParentId(parentId).map { it.toDomain() }
+    fun deleteAll(categories: List<Category>) {
+        categoryJpaRepository.deleteAll(categories.map { CategoryEntity(it) })
     }
 }

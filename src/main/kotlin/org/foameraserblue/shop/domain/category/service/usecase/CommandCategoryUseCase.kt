@@ -7,10 +7,9 @@ interface CommandCategoryUseCase {
 
     fun update(id: Long, title: String): Category
 
-    fun moveLocation(
+    fun moveParent(
         id: Long,
         newParentId: Long?,
-        newOrder: Int,
     ): Category
 
     fun delete(id: Long)

@@ -40,7 +40,7 @@ class CategoryController(
         @RequestBody request: MoveLocationCategoryRequest,
     ): CategoryResponse {
         return CategoryResponse(
-            commandCategoryUseCase.moveLocation(id, request.newParentId, request.newOrder)
+            commandCategoryUseCase.moveParent(id, request.newParentId)
         )
     }
 
