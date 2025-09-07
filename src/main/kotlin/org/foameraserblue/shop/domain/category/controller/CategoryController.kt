@@ -17,6 +17,7 @@ class CategoryController(
             commandCategoryUseCase.create(
                 title = request.title,
                 parentId = request.parentId,
+                categoryCode = request.categoryCode
             )
         )
     }
@@ -25,13 +26,13 @@ class CategoryController(
     fun getAll(@RequestParam id: Long?): CategoryTreeResponse {
         return CategoryTreeResponse.toDto(
             id
-                ?.let { queryCategoryUseCase.getAllWithChildrenById(id) }
-                ?: queryCategoryUseCase.getAll())
+                ?.let { queryCategoryUseCase.getAllMeAndChildrenTree(id) }
+                ?: queryCategoryUseCase.getAllTree())
     }
 
-    @PutMapping("{id}")
+    @PatchMapping("{id}")
     fun update(@PathVariable id: Long, @RequestBody request: UpdateCategoryRequest): CategoryResponse {
-        return CategoryResponse(commandCategoryUseCase.update(id, request.title))
+        return CategoryResponse(commandCategoryUseCase.patch(id, request.title, request.code))
     }
 
     @PutMapping("{id}/location")

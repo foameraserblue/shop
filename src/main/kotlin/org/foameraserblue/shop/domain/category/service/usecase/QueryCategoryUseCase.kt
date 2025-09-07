@@ -1,9 +1,9 @@
 package org.foameraserblue.shop.domain.category.service.usecase
 
-import org.foameraserblue.shop.domain.category.domain.Category
+import org.foameraserblue.shop.domain.category.domain.CategoryTree
 
 interface QueryCategoryUseCase {
-    fun getAll(): List<Category>
+    fun getAllTree(): List<CategoryTree>
 
-    fun getAllWithChildrenById(id: Long): List<Category>
+    fun getAllMeAndChildrenTree(id: Long): CategoryTree
 }
