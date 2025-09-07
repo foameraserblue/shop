@@ -11,6 +11,4 @@ interface CategoryJpaRepository : JpaRepository<CategoryEntity, Long> {
     fun existsByCode(code: String): Boolean
 
     fun findAllByParentCode(parentCode: String): List<CategoryEntity>
-
-    fun findByParentCode(parentCode: String): List<CategoryEntity>
 }

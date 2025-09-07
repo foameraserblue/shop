@@ -6,14 +6,16 @@ data class CategoryResponse(
     val id: Long,
     val title: String,
     val depth: Int,
-    val categoryCode: String,
-    val parentCode: String?,
+    var rootCode: String,
+    var parentCode: String?,
+    var code: String,
 ) {
     constructor(category: Category) : this(
         id = category.id,
         title = category.title,
         depth = category.depth,
-        categoryCode = category.code,
+        rootCode = category.rootCode,
         parentCode = category.parentCode,
+        code = category.code,
     )
 }

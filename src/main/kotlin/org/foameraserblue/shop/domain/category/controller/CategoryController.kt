@@ -15,19 +15,19 @@ class CategoryController(
     fun create(@RequestBody request: CreateCategoryRequest): CategoryResponse {
         return CategoryResponse(
             commandCategoryUseCase.create(
+                parentCode = request.parentCode,
                 title = request.title,
-                parentId = request.parentId,
-                categoryCode = request.categoryCode
+                code = request.code,
             )
         )
     }
 
     @GetMapping
     fun getAll(@RequestParam id: Long?): CategoryTreeResponse {
-        return CategoryTreeResponse.toDto(
-            id
-                ?.let { queryCategoryUseCase.getAllMeAndChildrenTree(id) }
-                ?: queryCategoryUseCase.getAllTree())
+        return id
+            ?.let { CategoryTreeResponse.toDto(queryCategoryUseCase.getAllMeAndChildrenTree(id)) }
+            ?: CategoryTreeResponse.toDto(queryCategoryUseCase.getAllTree())
+
     }
 
     @PatchMapping("{id}")
@@ -35,13 +35,13 @@ class CategoryController(
         return CategoryResponse(commandCategoryUseCase.patch(id, request.title, request.code))
     }
 
-    @PutMapping("{id}/location")
+    @PutMapping("{id}/move")
     fun moveLocation(
         @PathVariable id: Long,
-        @RequestBody request: MoveLocationCategoryRequest,
+        @RequestBody request: MoveCategoryRequest,
     ): CategoryResponse {
         return CategoryResponse(
-            commandCategoryUseCase.moveParent(id, request.newParentId)
+            commandCategoryUseCase.moveParent(id, request.newParentCode)
         )
     }
 
