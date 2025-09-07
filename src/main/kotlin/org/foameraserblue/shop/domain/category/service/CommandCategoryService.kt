@@ -22,17 +22,10 @@ class CommandCategoryService(
                 // 리프 카테고리 생성 조건
                 val parent = categoryAdapter.findByCode(parentCode)
 
-                return Category.createForLeaf(
-                    parent = parent,
-                    title = title,
-                    code = code,
-                )
+                Category.createForLeaf(parent = parent, title = title, code = code)
             } else {
                 // 루트 카테고리 생성조건
-                Category.createForRoot(
-                    title = title,
-                    code = code,
-                )
+                Category.createForRoot(title = title, code = code)
             }
 
         validateForCreate(category)
@@ -49,17 +42,17 @@ class CommandCategoryService(
     }
 
     override fun patch(
-        id: Long,
+        code: String,
         title: String?,
-        code: String?,
+        newCode: String?,
     ): Category {
-        val category = categoryAdapter.findById(id)
+        val category = categoryAdapter.findByCode(code)
 
-        // 코드 변경시 인접한 자식의 parentCode를 다 변경해줌.
-        if (code != null) {
+        if (newCode != null) {
             val oldCode = category.code
             val children = categoryAdapter.findAllByParentCode(oldCode)
 
+            // 타켓 카테고리의 코드 변경시 인접한 자식의 parentCode를 다 변경해줍니다.
             categoryAdapter.saveAll(children.onEach { it.updateParentCode(code) })
         }
 
@@ -67,39 +60,46 @@ class CommandCategoryService(
     }
 
     override fun moveParent(
-        id: Long,
+        code: String,
         newParentCode: String?,
     ): Category {
-        val category = categoryAdapter.findById(id)
+        val category = categoryAdapter.findByCode(code)
 
         // 하위 루트아이디 다 바꿔줘야함.
         if (category.parentCode != newParentCode) {
             val oldRootCode = category.rootCode
             val oldDepth = category.depth
 
+            // 새로운 parent 를 찾습니다. parent 가 없으면 루트 카테고리가 된다는 의미입니다.
             val newParentOrNull = categoryAdapter.findByCodeOrNull(newParentCode)
             category.moveParent(newParentOrNull)
 
+            // 타겟 카테고리의 하위 카테고리를 전부 가져옵니다.
             val meAndUnderDepthCategory =
                 categoryAdapter.findAllByRootCodeAndDepthGreaterThanEqual(oldRootCode, oldDepth)
             val allChildren = CategoryTree.getAllMeAndChildrenList(meAndUnderDepthCategory, category.code)
                 .filter { it.id != category.id }
 
-            allChildren.forEach { it.updateRootCode(category.rootCode) }
-
-            categoryAdapter.saveAll(allChildren)
+            // 하위 카테고리의 위치와 연결을 부모에 맞게 변경해줍니다.
+            categoryAdapter.saveAll(
+                allChildren
+                    .onEach { it.moveParent(category) }
+            )
         }
 
         return categoryAdapter.save(category)
     }
 
-    // 카테고리 삭제시, 하위의 children 카테고리들을 전부 삭제해야함.
-    override fun delete(id: Long) {
-        val category = categoryAdapter.findById(id)
+    override fun delete(code: String) {
+        val category = categoryAdapter.findByCode(code)
+
+        // 타겟 타케고리와 하위의 모든 카테고리를 가져옵니다. 하위의 카테고리는 같은 root 를 공유하지만, 다른 부모를 가진 카테고리도 포함됩니다.
         val meAndUnderDepthCategory =
             categoryAdapter.findAllByRootCodeAndDepthGreaterThanEqual(category.rootCode, category.depth)
 
+        // 타켓 카테고리와 하위의 모든 카테고리를 List 형태로 가져옵니다.
         val meAndAllChildren = CategoryTree.getAllMeAndChildrenList(meAndUnderDepthCategory, category.code)
+
         categoryAdapter.deleteAll(meAndAllChildren)
     }
 }

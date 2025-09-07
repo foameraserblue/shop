@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
+// 테스트 오류 확인용으로 작성
 @RestControllerAdvice
 class ExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)

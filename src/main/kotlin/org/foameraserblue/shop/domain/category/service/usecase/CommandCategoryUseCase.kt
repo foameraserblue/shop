@@ -10,15 +10,15 @@ interface CommandCategoryUseCase {
     ): Category
 
     fun patch(
-        id: Long,
+        code: String,
         title: String?,
-        code: String?,
+        newCode: String?,
     ): Category
 
     fun moveParent(
-        id: Long,
+        code: String,
         newParentCode: String?,
     ): Category
 
-    fun delete(id: Long)
+    fun delete(code: String)
 }

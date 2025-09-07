@@ -5,5 +5,5 @@ import org.foameraserblue.shop.domain.category.domain.CategoryTree
 interface QueryCategoryUseCase {
     fun getAllTree(): List<CategoryTree>
 
-    fun getAllMeAndChildrenTree(id: Long): CategoryTree
+    fun getAllMeAndChildrenTree(code: String): CategoryTree
 }

@@ -31,7 +31,7 @@ data class CategoryTree(
             return dfsToTree(childrenByParentCode, root)
         }
 
-        // 카테고리는 단일 루트를 가진 트리가 아닌 포레스트 형태이기때문에 List<CategoryTree> 로 반환하였습니다.
+        // 카테고리는 단일 루트를 가진 트리가 아닌 여러 트리의 집합 형태이기때문에 List<CategoryTree> 로 반환하였습니다.
         fun getAllTree(categories: List<Category>): List<CategoryTree> {
             val childrenByParentCode: Map<String?, List<Category>> =
                 categories
@@ -48,10 +48,15 @@ data class CategoryTree(
             category: Category,
             list: MutableList<Category>
         ): List<Category> {
-            val children = childrenByParentCode[category.code].orEmpty()
-                .flatMap { dfsToList(childrenByParentCode, it, list) }
+            list.add(category)
 
-            return list.addAll(children).let { list }
+            val children = childrenByParentCode[category.code].orEmpty()
+            children.forEach { child ->
+                dfsToList(childrenByParentCode, child, list)
+            }
+
+            return list
+
         }
 
         private fun dfsToTree(childrenByParentCode: Map<String?, List<Category>>, category: Category): CategoryTree {

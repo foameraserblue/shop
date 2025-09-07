@@ -5,6 +5,9 @@ import org.foameraserblue.shop.domain.category.service.usecase.CommandCategoryUs
 import org.foameraserblue.shop.domain.category.service.usecase.QueryCategoryUseCase
 import org.springframework.web.bind.annotation.*
 
+/**
+ * 테스트/사용성 편의를 위해 파라미터로 id 가 아닌 code 를 사용합니다.
+ */
 @RestController
 @RequestMapping("/categories")
 class CategoryController(
@@ -23,30 +26,30 @@ class CategoryController(
     }
 
     @GetMapping
-    fun getAll(@RequestParam id: Long?): CategoryTreeResponse {
-        return id
-            ?.let { CategoryTreeResponse.toDto(queryCategoryUseCase.getAllMeAndChildrenTree(id)) }
+    fun getAll(@RequestParam code: String?): CategoryTreeResponse {
+        return code
+            ?.let { CategoryTreeResponse.toDto(queryCategoryUseCase.getAllMeAndChildrenTree(code)) }
             ?: CategoryTreeResponse.toDto(queryCategoryUseCase.getAllTree())
 
     }
 
-    @PatchMapping("{id}")
-    fun update(@PathVariable id: Long, @RequestBody request: UpdateCategoryRequest): CategoryResponse {
-        return CategoryResponse(commandCategoryUseCase.patch(id, request.title, request.code))
+    @PatchMapping("{code}")
+    fun update(@PathVariable code: String, @RequestBody request: UpdateCategoryRequest): CategoryResponse {
+        return CategoryResponse(commandCategoryUseCase.patch(code, request.title, request.newCode))
     }
 
-    @PutMapping("{id}/move")
+    @PutMapping("{code}/move")
     fun moveLocation(
-        @PathVariable id: Long,
+        @PathVariable code: String,
         @RequestBody request: MoveCategoryRequest,
     ): CategoryResponse {
         return CategoryResponse(
-            commandCategoryUseCase.moveParent(id, request.newParentCode)
+            commandCategoryUseCase.moveParent(code, request.newParentCode)
         )
     }
 
-    @DeleteMapping("{id}")
-    fun delete(@PathVariable id: Long) {
-        commandCategoryUseCase.delete(id)
+    @DeleteMapping("{code}")
+    fun delete(@PathVariable code: String) {
+        commandCategoryUseCase.delete(code)
     }
 }

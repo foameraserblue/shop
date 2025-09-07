@@ -3,7 +3,6 @@ package org.foameraserblue.shop.domain.category.infrastructure.db
 import org.foameraserblue.shop.common.exception.NotFoundException
 import org.foameraserblue.shop.domain.category.domain.Category
 import org.foameraserblue.shop.domain.category.infrastructure.db.entitiy.CategoryEntity
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -16,12 +15,6 @@ class CategoryAdapter(
 
     fun saveAll(categories: List<Category>): List<Category> {
         return categoryJpaRepository.saveAll(categories.map { CategoryEntity(it) }).map { it.toDomain() }
-    }
-
-    fun findById(id: Long): Category {
-        return categoryJpaRepository.findByIdOrNull(id)
-            ?.toDomain()
-            ?: throw NotFoundException("$id ID의 카테고리가 존재하지않습니다.")
     }
 
     fun findByCode(code: String): Category {
