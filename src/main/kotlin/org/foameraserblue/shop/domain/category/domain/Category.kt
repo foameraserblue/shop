@@ -16,14 +16,6 @@ class Category(
     // 깊이
     var depth: Int,
 
-    /**
-     * 여러 루트 카테고리가 있다는 가정하에, 특정 루트 카테고리 하위인지 여부만 알아도
-     * search 시 가져오는 데이터가 적어질 수 있다는 생각을 했습니다.
-     *
-     * 카테고리가 속해있는 루트의 code 이며, 카테고리 search 시 결과값을 최소화하려는 용도로 사용합니다.
-     */
-    var rootCode: String,
-
     // 부모 카테고리 코드이며 부모 자식간 연결관계를 나타냅니다.
     // 루트 카테고리의 경우 parentCode 는 null 입니다.
     var parentCode: String?,
@@ -41,7 +33,6 @@ class Category(
         fun createForLeaf(parent: Category, title: String, code: String): Category {
             return Category(
                 title = title,
-                rootCode = parent.rootCode,
                 depth = parent.depth.plus(1),
                 parentCode = parent.code,
                 code = code
@@ -51,7 +42,6 @@ class Category(
         fun createForRoot(title: String, code: String): Category {
             return Category(
                 title = title,
-                rootCode = code,
                 depth = 0,
                 parentCode = null,
                 code = code
@@ -60,20 +50,34 @@ class Category(
     }
 
     init {
-        validateDepthAndOrder()
-        validateDepthAndParentId()
+        validateConsistency()
     }
 
     val isRoot: Boolean
         get() = this.depth == 0 && this.parentCode == null
 
-    private fun validateDepthAndOrder() {
+    val isNonRoot: Boolean
+        get() = this.depth > 0 && this.parentCode != null
+
+    private fun validateConsistency() {
+        validateDepth()
+        validateRoot()
+        validateNonRoot()
+    }
+
+    private fun validateDepth() {
         require(this.depth >= 0) { "depth 는 음수가 될 수 없습니다." }
     }
 
-    private fun validateDepthAndParentId() {
+    private fun validateRoot() {
         if (this.depth == 0 || this.parentCode == null) {
             require(this.isRoot) { "depth 가 0 이거나 부모 code 가 존재하지 않으면 root 카테고리여야합니다." }
+        }
+    }
+
+    private fun validateNonRoot() {
+        if (this.depth > 0 || this.parentCode != null) {
+            require(this.isNonRoot) { "depth 가 0 보다 크거나 부모 code 가 존재하면 non root 카테고리여야합니다." }
         }
     }
 
@@ -83,23 +87,31 @@ class Category(
         }
         if (code != null) {
             this.code = code
+            validateConsistency()
         }
     }
 
     fun updateParentCode(newParentCode: String) = apply {
         this.parentCode = newParentCode
+
+        validateConsistency()
     }
 
-    fun moveWithParent(newRootCode: String, depthGap: Int) = apply {
-        this.rootCode = newRootCode
+    fun moveWithParent(depthGap: Int) = apply {
         this.depth += depthGap
+
+        validateDepth()
     }
 
     // 바뀐 parent 에 맞게 연결관계 및 depth 를 변경해줍니다.
     fun moveParent(newParent: Category?) = apply {
-        this.rootCode = newParent?.rootCode ?: this.code
+        val newParentCode = newParent?.code
+        require(newParentCode != this.code) { "자기 자신을 부모로 지정할 수 없습니다." }
+
         this.depth = newParent?.depth?.plus(1) ?: 0
-        this.parentCode = newParent?.code
+        this.parentCode = newParentCode
+
+        validateConsistency()
     }
 }
 

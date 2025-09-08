@@ -6,7 +6,6 @@ data class CategoryResponse(
     val id: Long,
     val title: String,
     val depth: Int,
-    var rootCode: String,
     var parentCode: String?,
     var code: String,
 ) {
@@ -14,7 +13,6 @@ data class CategoryResponse(
         id = category.id,
         title = category.title,
         depth = category.depth,
-        rootCode = category.rootCode,
         parentCode = category.parentCode,
         code = category.code,
     )

@@ -20,7 +20,7 @@ class QueryCategoryService(
     override fun getAllMeAndChildrenTree(code: String): CategoryTree {
         val category = categoryAdapter.findByCode(code)
         val candidates =
-            categoryAdapter.findAllByRootCodeAndDepthGreaterThanEqual(category.rootCode, category.depth)
+            categoryAdapter.findAllByDepthGreaterThanEqual(category.depth)
 
         return CategoryTree.getAllMeAndDescendantsTree(candidates, category.code)
     }

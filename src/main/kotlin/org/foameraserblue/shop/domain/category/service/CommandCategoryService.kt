@@ -83,9 +83,9 @@ class CommandCategoryService(
 
         category.moveParent(newParentOrNull)
 
-        // 자손들을, 부모가 이동한 만큼 depth 를 이동시키고, rootCode 를 보정합니다.
+        // 자손들을, 부모가 이동한 만큼 depth 를 이동시킵니다.
         val depthGap = category.depth - oldDepth
-        moveDescendantsWithParent(descendants, category.rootCode, depthGap)
+        moveDescendantsWithParent(descendants, depthGap)
 
         categoryAdapter.saveAll(descendants)
         return categoryAdapter.save(category)
@@ -94,7 +94,7 @@ class CommandCategoryService(
     // category 의 모든 후손을 찾습니다.
     private fun getDescendants(category: Category): List<Category> {
         val candidates =
-            categoryAdapter.findAllByRootCodeAndDepthGreaterThanEqual(category.rootCode, category.depth)
+            categoryAdapter.findAllByDepthGreaterThanEqual(category.depth)
 
         return CategoryTree
             .getAllMeAndDescendantsList(candidates, category.code)
@@ -107,16 +107,16 @@ class CommandCategoryService(
         }
     }
 
-    private fun moveDescendantsWithParent(descendants: List<Category>, newRootCode: String, depthGap: Int) {
-        descendants.forEach { it.moveWithParent(newRootCode, depthGap) }
+    private fun moveDescendantsWithParent(descendants: List<Category>, depthGap: Int) {
+        descendants.forEach { it.moveWithParent(depthGap) }
     }
 
     override fun delete(code: String) {
         val category = categoryAdapter.findByCode(code)
 
-        // 타겟 타케고리와 하위의 모든 카테고리를 가져옵니다. 하위의 카테고리는 같은 root 를 공유하지만, 다른 부모를 가진 카테고리도 포함됩니다.
+        // 타겟 타케고리의 depth 이하의 모든 카테고리를 가져옵니다.
         val candidates =
-            categoryAdapter.findAllByRootCodeAndDepthGreaterThanEqual(category.rootCode, category.depth)
+            categoryAdapter.findAllByDepthGreaterThanEqual(category.depth)
 
         // 타켓 카테고리와 하위의 모든 카테고리를 List 형태로 가져옵니다.
         val meAndAllDescendants = CategoryTree.getAllMeAndDescendantsList(candidates, category.code)

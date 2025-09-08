@@ -14,8 +14,6 @@ class CategoryEntity(
 
     val depth: Int,
 
-    val rootCode: String,
-
     val parentCode: String?,
 
     val code: String,
@@ -23,7 +21,6 @@ class CategoryEntity(
     constructor(category: Category) : this(
         id = category.id,
         title = category.title,
-        rootCode = category.rootCode,
         depth = category.depth,
         parentCode = category.parentCode,
         code = category.code,
@@ -32,7 +29,6 @@ class CategoryEntity(
     fun toDomain() = Category(
         id = id,
         title = title,
-        rootCode = rootCode,
         depth = depth,
         parentCode = parentCode,
         code = code

@@ -4,7 +4,7 @@ import org.foameraserblue.shop.domain.category.infrastructure.db.entitiy.Categor
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface CategoryJpaRepository : JpaRepository<CategoryEntity, Long> {
-    fun findAllByRootCodeAndDepthGreaterThanEqual(rootCode: String, depth: Int): List<CategoryEntity>
+    fun findAllByDepthGreaterThanEqual(depth: Int): List<CategoryEntity>
 
     fun findByCode(code: String?): CategoryEntity?
 

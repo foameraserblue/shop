@@ -28,8 +28,8 @@ class CategoryAdapter(
             ?.toDomain()
     }
 
-    fun findAllByRootCodeAndDepthGreaterThanEqual(rootCode: String, depth: Int): List<Category> {
-        return categoryJpaRepository.findAllByRootCodeAndDepthGreaterThanEqual(rootCode, depth).map { it.toDomain() }
+    fun findAllByDepthGreaterThanEqual(depth: Int): List<Category> {
+        return categoryJpaRepository.findAllByDepthGreaterThanEqual(depth).map { it.toDomain() }
     }
 
     fun findAllByParentCode(parentCode: String): List<Category> {
