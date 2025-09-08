@@ -27,7 +27,6 @@ class CommandCategoryService(
         // 루트 카테고리 생성조건
             ?: Category.createForRoot(title = title, code = code)
 
-
         validateCode(category.code)
 
         return categoryAdapter.save(category)
@@ -80,28 +79,36 @@ class CommandCategoryService(
         val newParentOrNull = categoryAdapter.findByCodeOrNull(newParentCode)
         // 타겟 카테고리의 후손을 찾습니다.
         val descendants = getDescendants(category)
-        require(!descendants.any { it.code == newParentCode }) {
-            "자기 후손의 하위카테고리로 이동할 수 없습니다."
-        }
+        validateNotMovingIntoDescendant(newParentCode, descendants)
 
         category.moveParent(newParentOrNull)
 
         // 자손들을, 부모가 이동한 만큼 depth 를 이동시키고, rootCode 를 보정합니다.
         val depthGap = category.depth - oldDepth
-        descendants.forEach { child ->
-            child.moveWithParent(category.rootCode, depthGap)
-        }
+        moveDescendantsWithParent(descendants, category.rootCode, depthGap)
 
         categoryAdapter.saveAll(descendants)
         return categoryAdapter.save(category)
     }
 
+    // category 의 모든 후손을 찾습니다.
     private fun getDescendants(category: Category): List<Category> {
         val candidates =
             categoryAdapter.findAllByRootCodeAndDepthGreaterThanEqual(category.rootCode, category.depth)
+
         return CategoryTree
             .getAllMeAndDescendantsList(candidates, category.code)
             .filter { it.id != category.id }
+    }
+
+    private fun validateNotMovingIntoDescendant(newParentCode: String?, descendants: List<Category>) {
+        require(!descendants.any { it.code == newParentCode }) {
+            "자기 후손의 하위카테고리로 이동할 수 없습니다."
+        }
+    }
+
+    private fun moveDescendantsWithParent(descendants: List<Category>, newRootCode: String, depthGap: Int) {
+        descendants.forEach { it.moveWithParent(newRootCode, depthGap) }
     }
 
     override fun delete(code: String) {
