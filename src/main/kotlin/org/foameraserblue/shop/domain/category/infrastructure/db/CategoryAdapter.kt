@@ -23,21 +23,18 @@ class CategoryAdapter(
             ?: throw NotFoundException("$code code의 카테고리가 존재하지않습니다.")
     }
 
-    fun findByCodeOrNull(code: String?): Category? {
-        return categoryJpaRepository.findByCode(code)
-            ?.toDomain()
-    }
-
-    fun findAllByDepthGreaterThanEqual(depth: Int): List<Category> {
-        return categoryJpaRepository.findAllByDepthGreaterThanEqual(depth).map { it.toDomain() }
-    }
-
-    fun findAllByParentCode(parentCode: String): List<Category> {
-        return categoryJpaRepository.findAllByParentCode(parentCode).map { it.toDomain() }
-    }
-
     fun findAll(): List<Category> {
         return categoryJpaRepository.findAll().map { it.toDomain() }
+    }
+
+    // 자기자신 + 후손 전부
+    fun findAllByCodeStartingWith(codePrefix: String): List<Category> {
+        return categoryJpaRepository.findAllByCodeStartingWith(codePrefix).map { it.toDomain() }
+    }
+
+    // 후손 전부
+    fun findAllByCodeStartingWithAndCodeNot(codePrefix: String, code: String): List<Category> {
+        return categoryJpaRepository.findAllByCodeStartingWithAndCodeNot(codePrefix, code).map { it.toDomain() }
     }
 
     fun existsByCode(code: String): Boolean {

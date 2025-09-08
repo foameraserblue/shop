@@ -1,6 +1,9 @@
 package org.foameraserblue.shop.domain.category.controller
 
-import org.foameraserblue.shop.domain.category.controller.dto.*
+import org.foameraserblue.shop.domain.category.controller.dto.CategoryResponse
+import org.foameraserblue.shop.domain.category.controller.dto.CategoryTreeResponse
+import org.foameraserblue.shop.domain.category.controller.dto.CreateCategoryRequest
+import org.foameraserblue.shop.domain.category.controller.dto.UpdateCategoryRequest
 import org.foameraserblue.shop.domain.category.service.usecase.CommandCategoryUseCase
 import org.foameraserblue.shop.domain.category.service.usecase.QueryCategoryUseCase
 import org.springframework.web.bind.annotation.*
@@ -20,7 +23,7 @@ class CategoryController(
             commandCategoryUseCase.create(
                 parentCode = request.parentCode,
                 title = request.title,
-                code = request.code,
+                segmentCode = request.segmentCode,
             )
         )
     }
@@ -28,24 +31,14 @@ class CategoryController(
     @GetMapping
     fun getAll(@RequestParam code: String?): CategoryTreeResponse {
         return code
-            ?.let { CategoryTreeResponse.toDto(queryCategoryUseCase.getAllMeAndChildrenTree(code)) }
-            ?: CategoryTreeResponse.toDto(queryCategoryUseCase.getAllTree())
+            ?.let { CategoryTreeResponse.toDto(queryCategoryUseCase.getAllMeAndDescendant(code)) }
+            ?: CategoryTreeResponse.toDto(queryCategoryUseCase.getAll())
 
     }
 
     @PatchMapping("{code}")
     fun update(@PathVariable code: String, @RequestBody request: UpdateCategoryRequest): CategoryResponse {
-        return CategoryResponse(commandCategoryUseCase.patch(code, request.title, request.newCode))
-    }
-
-    @PutMapping("{code}/move")
-    fun moveLocation(
-        @PathVariable code: String,
-        @RequestBody request: MoveCategoryRequest,
-    ): CategoryResponse {
-        return CategoryResponse(
-            commandCategoryUseCase.moveParent(code, request.newParentCode)
-        )
+        return CategoryResponse(commandCategoryUseCase.update(code, request.title, request.newSegmentCode))
     }
 
     @DeleteMapping("{code}")

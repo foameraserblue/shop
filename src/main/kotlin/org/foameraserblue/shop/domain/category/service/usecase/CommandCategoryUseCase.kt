@@ -4,20 +4,15 @@ import org.foameraserblue.shop.domain.category.domain.Category
 
 interface CommandCategoryUseCase {
     fun create(
-        parentCode: String?,
+        parentCode: String,
         title: String,
-        code: String,
+        segmentCode: String,
     ): Category
 
-    fun patch(
+    fun update(
         code: String,
-        title: String?,
-        newCode: String?,
-    ): Category
-
-    fun moveParent(
-        code: String,
-        newParentCode: String?,
+        title: String,
+        newSegmentCode: String,
     ): Category
 
     fun delete(code: String)

@@ -1,7 +1,7 @@
 package org.foameraserblue.shop.domain.category.controller.dto
 
 data class CreateCategoryRequest(
-    val parentCode: String?,
+    val parentCode: String,
     val title: String,
-    val code: String,
+    val segmentCode: String,
 )

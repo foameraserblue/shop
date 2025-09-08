@@ -1,50 +1,42 @@
 package org.foameraserblue.shop.domain.category.domain
 
-/**
- * 구현의도
- * 1. 카테고리는 일반적인 트리 형태가 아닌, 여러 트리가 모여 여러 루트(상의, 하의 같은 최상위 카테고리)를 가진 구조일것이다.
- * 2. 카테고리는 이진트리가 아니며, 자식으로 여러 노드를 가질 수 있는 트리일 것이다.
- * 3. 카테고리는 생성/수정/삭제 보다 조회의 빈도수가 높을것이다. 즉 조회 최적화를 해야한다.
- * 4. 카테고리끼리 직접 참조하게 도메인을 작성하면 DB 터치 횟수 및 join 쿼리가 많아져 DB 성능에 악영향을 미칠것이다.
- * 5. 직접 참조가 아닌 각 카테고리의 code 만으로 연결관계를 구성한다.
- */
 class Category(
     val id: Long = 0,
 
     var title: String,
 
-    // 깊이
-    var depth: Int,
-
-    // 부모 카테고리 코드이며 부모 자식간 연결관계를 나타냅니다.
-    // 루트 카테고리의 경우 parentCode 는 null 입니다.
-    var parentCode: String?,
-
-    /**
-     * id 가 아닌 코드를 사용한 이유
-     *
-     * 카테고리 코드를 증권 회사코드 같은 개념으로 봤음. 즉 모든 환경에서 고정된 값이였으면 했음.
-     * id 는 디비에서 내려주는, 환경마다 다른 값이여서 사용자가 원하는 값을 설정할 수 없음
-     * 또한 생성시점에 영속화가 되어야만 id 값 확인이 가능해서 연결관계 매핑이 애매함.
-     */
+    // Materialized Path 로 사용합니다.
+    // 코드를 3자리로 한정한다는 가정하에 사용되며
+    // 3자리의 고유 숫자를 segment 로 지칭합니다.
+    // 예) "100110111"
     var code: String,
 ) {
     companion object {
-        fun createForLeaf(parent: Category, title: String, code: String): Category {
+        private val SEGMENT_3DIGIT_REGEX = Regex("\\d{3}")
+
+        private fun validateSegment(segment: String) {
+            require(SEGMENT_3DIGIT_REGEX.matches(segment)) { "코드의 세그먼트는 3자리 숫자여야 합니다." }
+        }
+
+        private fun makeCode(parentCode: String, segment: String): String {
+            return "$parentCode$segment"
+        }
+
+        fun createForLeaf(parent: Category, title: String, segment: String): Category {
+            validateSegment(segment)
+
             return Category(
                 title = title,
-                depth = parent.depth.plus(1),
-                parentCode = parent.code,
-                code = code
+                code = makeCode(parent.code, segment)
             )
         }
 
-        fun createForRoot(title: String, code: String): Category {
+        fun createForRoot(title: String, rootSegment: String): Category {
+            validateSegment(rootSegment)
+
             return Category(
                 title = title,
-                depth = 0,
-                parentCode = null,
-                code = code
+                code = rootSegment
             )
         }
     }
@@ -54,65 +46,64 @@ class Category(
     }
 
     val isRoot: Boolean
-        get() = this.depth == 0 && this.parentCode == null
+        get() = this.code.length == 3
 
-    val isNonRoot: Boolean
-        get() = this.depth > 0 && this.parentCode != null
+    // 부모가 없으면 빈 문자열을 반환합니다
+    val parentCodeOrEmpty: String
+        get() = if (this.isRoot) "" else this.code.dropLast(3)
+
+    val segment: String
+        get() = this.code.takeLast(3)
+
+    private fun validateCode(code: String) {
+        require(code.isNotBlank()) { "code는 비어있을 수 없습니다." }
+        require(code.all { it.isDigit() }) { "code는 숫자만 포함해야 합니다." }
+        require(code.length % 3 == 0) { "code의 길이는 3의 배수여야 합니다." }
+    }
+
 
     private fun validateConsistency() {
-        validateDepth()
-        validateRoot()
-        validateNonRoot()
-    }
+        validateCode(this.code)
 
-    private fun validateDepth() {
-        require(this.depth >= 0) { "depth 는 음수가 될 수 없습니다." }
-    }
-
-    private fun validateRoot() {
-        if (this.depth == 0 || this.parentCode == null) {
-            require(this.isRoot) { "depth 가 0 이거나 부모 code 가 존재하지 않으면 root 카테고리여야합니다." }
+        if (this.isRoot) {
+            require(this.code.length == 3) { "루트의 code 는 정확히 3자리여야 합니다." }
+        } else {
+            require(this.code.length >= 6) { "비루트의 code 는 최소 6자리(부모 3자리 + 자신 3자리) 이상이어야 합니다." }
         }
     }
 
-    private fun validateNonRoot() {
-        if (this.depth > 0 || this.parentCode != null) {
-            require(this.isNonRoot) { "depth 가 0 보다 크거나 부모 code 가 존재하면 non root 카테고리여야합니다." }
-        }
-    }
-
-    fun patch(title: String?, code: String?) = apply {
-        if (title != null) {
-            this.title = title
-        }
-        if (code != null) {
-            this.code = code
-            validateConsistency()
-        }
-    }
-
-    fun updateParentCode(newParentCode: String) = apply {
-        this.parentCode = newParentCode
+    fun update(title: String, newSegment: String) = apply {
+        this.title = title
+        changeMySegment(newSegment)
 
         validateConsistency()
     }
 
-    fun moveWithParent(depthGap: Int) = apply {
-        this.depth += depthGap
+    // 마지막 3자리 세그먼트만 교체합니다(부모 경로는 유지)
+    private fun changeMySegment(newSegment: String) {
+        if (newSegment == this.segment) return
+        validateSegment(newSegment)
 
-        validateDepth()
+        val parenCode = this.parentCodeOrEmpty
+        val newCode = makeCode(parenCode, newSegment)
+
+        this.code = newCode
     }
 
-    // 바뀐 parent 에 맞게 연결관계 및 depth 를 변경해줍니다.
-    fun moveParent(newParent: Category?) = apply {
-        val newParentCode = newParent?.code
-        require(newParentCode != this.code) { "자기 자신을 부모로 지정할 수 없습니다." }
+    fun rebaseWithParent(oldPrefix: String, newPrefix: String) = apply {
+        validateCode(oldPrefix)
+        validateCode(newPrefix)
 
-        this.depth = newParent?.depth?.plus(1) ?: 0
-        this.parentCode = newParentCode
+        require(oldPrefix.length == newPrefix.length) {
+            "oldPrefix 와 newPrefix 는 동일한 길이를 가져야 합니다."
+        }
+        require(this.code.startsWith(oldPrefix)) { "후손 code 가 아닙니다." }
+
+        val suffix = this.code.removePrefix(oldPrefix)
+        val newCode = makeCode(newPrefix, suffix)
+
+        this.code = newCode
 
         validateConsistency()
     }
 }
-
-

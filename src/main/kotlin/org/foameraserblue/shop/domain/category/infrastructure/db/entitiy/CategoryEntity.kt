@@ -9,28 +9,18 @@ import org.foameraserblue.shop.domain.category.domain.Category
 @Table(name = "category")
 class CategoryEntity(
     id: Long,
-
     val title: String,
-
-    val depth: Int,
-
-    val parentCode: String?,
-
     val code: String,
 ) : BaseLongIdEntity(id) {
     constructor(category: Category) : this(
         id = category.id,
         title = category.title,
-        depth = category.depth,
-        parentCode = category.parentCode,
         code = category.code,
     )
 
     fun toDomain() = Category(
         id = id,
         title = title,
-        depth = depth,
-        parentCode = parentCode,
         code = code
     )
 }
