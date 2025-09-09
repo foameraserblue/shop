@@ -17,7 +17,7 @@ class CommandCategoryService(
         segmentCode: String,
     ): Category {
         val category =
-            if (parentCode.isEmpty()) {
+            if (parentCode.isBlank()) {
                 // 루트 카테고리 생성조건
                 Category.createForRoot(title = title, rootSegment = segmentCode)
             } else {

@@ -8,215 +8,211 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 
 class CategoryTest : BehaviorSpec({
-    fun root(title: String = "상의", code: String = "TOP"): Category =
-        Category.createForRoot(title, code)
 
-    fun leaf(
-        parent: Category,
-        title: String = "셔츠",
-        code: String = "SHIRT",
-    ): Category = Category.createForLeaf(parent, title, code)
+    fun root(title: String = "루트", seg: String = "123"): Category =
+        Category.createForRoot(title, seg)
 
-    given("createForRoot 팩토리") {
-        `when`("루트 카테고리를 생성하면") {
-            val category = root(title = "루트", code = "ROOT")
+    fun leaf(parent: Category, title: String = "자식", seg: String = "456"): Category =
+        Category.createForLeaf(parent, title, seg)
 
-            then("depth=0, parentCode=null, rootCode=code, isRoot=true 이어야 한다") {
-                category.title.shouldBe("루트")
-                category.depth.shouldBe(0)
-                category.parentCode.shouldBe(null)
-                category.rootCode.shouldBe("ROOT")
-                category.code.shouldBe("ROOT")
+    Given("루트 카테고리를 생성하려한다") {
+        When("올바른 3자리 숫자 세그먼트로 생성하면") {
+            val category = root(title = "상의", seg = "001")
+
+            Then("루트 카테고리로 정상 생성된다") {
+                category.title.shouldBe("상의")
+                category.code.shouldBe("001")
+                category.isRoot.shouldBeTrue()
+                category.parentCodeOrEmpty.shouldBe("")
+                category.segment.shouldBe("001")
+            }
+        }
+
+        When("세그먼트가 3자리 숫자가 아니면") {
+            listOf("1", "12", "1234", "12A", "A23", " 12", "AAA")
+
+                .forEach { invalidCategory ->
+                    Then("예외가 발생한다") {
+                        val e = shouldThrow<IllegalArgumentException> {
+                            root(seg = invalidCategory)
+                        }
+
+                        e.message.shouldBe("코드의 세그먼트는 3자리 숫자여야 합니다.")
+                    }
+                }
+        }
+    }
+
+    Given("리프 카테고리를 생성하려한다") {
+        val parent = root(seg = "123")
+
+        When("올바른 3자리 세그먼트로 생성하면") {
+            val child = leaf(parent, title = "셔츠", seg = "456")
+
+            Then("정상 생성된다") {
+                child.title.shouldBe("셔츠")
+                child.code.shouldBe("123456")
+                child.isRoot.shouldBeFalse()
+                child.parentCodeOrEmpty.shouldBe("123")
+                child.segment.shouldBe("456")
+            }
+        }
+
+        When("세그먼트가 3자리 숫자가 아니면") {
+            listOf("0", "45", "4567", "45X").forEach { invalid ->
+
+                Then("예외가 발생한다") {
+                    val e = shouldThrow<IllegalArgumentException> {
+                        leaf(parent, seg = invalid)
+                    }
+
+                    e.message.shouldBe("코드의 세그먼트는 3자리 숫자여야 합니다.")
+                }
+            }
+        }
+    }
+
+    Given("생성시 코드 벨리데이션") {
+        When("code가 비어있으면") {
+            Then("예외가 발생한다") {
+                val e = shouldThrow<IllegalArgumentException> {
+                    Category(id = 1L, title = "비어있음", code = "")
+                }
+
+                e.message.shouldBe("code는 비어있을 수 없습니다.")
+            }
+        }
+
+        When("code에 숫자 이외의 문자가 포함되면") {
+            Then("예외가 발생한다") {
+                val e = shouldThrow<IllegalArgumentException> {
+                    Category(id = 1L, title = "숫자 아님", code = "12A")
+                }
+
+                e.message.shouldBe("code는 숫자만 포함해야 합니다.")
+            }
+        }
+
+        When("code 길이가 세자릿수가 아니면") {
+            Then("예외가 발생한다") {
+                val e = shouldThrow<IllegalArgumentException> {
+                    Category(id = 1L, title = "4 자릿수", code = "1234")
+                }
+
+                e.message.shouldContain("code의 길이는 3의 배수여야 합니다.")
+            }
+        }
+
+        When("루트 카테고리면") {
+            val category = Category(title = "루트", code = "999")
+
+            Then("isRoot 는 true 이다") {
                 category.isRoot.shouldBeTrue()
             }
         }
-    }
 
-    given("createForLeaf 팩토리") {
-        val parent = root(code = "ROOT")
+        When("루트 카테고리가 아니면") {
+            val category1 = Category(title = "비루트1", code = "123456")
+            val category2 = Category(title = "비루트2", code = "123456789")
 
-        `when`("자식 카테고리를 생성하면") {
-            val child = leaf(parent, title = "자식", code = "CHILD")
-
-            then("부모의 rootCode를 상속하고, parentCode는 부모의 code, depth는 부모+1 이어야 한다") {
-                child.title.shouldBe("자식")
-                child.depth.shouldBe(parent.depth + 1)
-                child.parentCode.shouldBe(parent.code)
-                child.rootCode.shouldBe(parent.rootCode)
-                child.code.shouldBe("CHILD")
-                child.isRoot.shouldBeFalse()
+            Then("isRoot 는 false 이다") {
+                category1.isRoot.shouldBeFalse()
+                category2.isRoot.shouldBeFalse()
             }
         }
     }
 
-    given("유효성 검증") {
-        `when`("depth가 음수인 카테고리를 생성하면") {
-            then("예외가 발생한다") {
-                val ex = shouldThrow<IllegalArgumentException> {
-                    Category(
-                        id = 1L,
-                        title = "invalid",
-                        depth = -1,
-                        rootCode = "R",
-                        parentCode = null,
-                        code = "C",
-                    )
+    Given("업데이트 테스트") {
+        When("변경되는 세그먼트가 기존과 동일할때") {
+            val category = Category.createForRoot("비포", "111")
+            category.update(title = "에프터", newSegment = "111")
+
+            Then("title만 변경된다") {
+                category.title.shouldBe("에프터")
+                category.code.shouldBe("111")
+                category.segment.shouldBe("111")
+            }
+        }
+
+        When("세그먼트를 변경하면") {
+            val parent = Category.createForRoot("부모", "123")
+            val child = Category.createForLeaf(parent, "자식", "456")
+            child.update(title = "자식2", newSegment = "789")
+
+            Then("title과 마지막 3자리가 변경되고, 부모 경로는 유지된다") {
+                child.title.shouldBe("자식2")
+                child.parentCodeOrEmpty.shouldBe("123")
+                child.code.shouldBe("123789")
+                child.segment.shouldBe("789")
+            }
+        }
+
+        When("세그먼트가 유효하지 않으면") {
+            val parent = Category.createForRoot("부모", "123")
+            val child = Category.createForLeaf(parent, "자식", "456")
+
+            Then("예외가 발생한다") {
+                val e = shouldThrow<IllegalArgumentException> {
+                    child.update(title = "오류 발생", newSegment = "78X")
                 }
-                ex.message.shouldContain("depth 는 음수가 될 수 없습니다.")
+
+                e.message.shouldBe("코드의 세그먼트는 3자리 숫자여야 합니다.")
+            }
+        }
+    }
+
+    Given("부모 코드를 리베이스 하려한다") {
+        When("올바른 oldPrefix/newPrefix로 리베이스하면") {
+            val category = Category(title = "대상", code = "111222333")
+            category.rebaseWithParent(oldPrefix = "111", newPrefix = "999")
+
+            Then("앞쪽 접두사만 교체된다") {
+                category.code.shouldBe("999222333")
+                category.parentCodeOrEmpty.shouldBe("999222")
+                category.segment.shouldBe("333")
             }
         }
 
-        `when`("depth=0 이면서 parentCode != null 인 경우") {
-            then("예외가 발생한다") {
-                val ex = shouldThrow<IllegalArgumentException> {
-                    Category(
-                        id = 1L,
-                        title = "invalid",
-                        depth = 0,
-                        rootCode = "R",
-                        parentCode = "P",
-                        code = "C",
-                    )
+        When("oldPrefix와 newPrefix 길이가 다르면") {
+            val category = Category(title = "1", code = "111")
+
+            Then("예외가 발생한다") {
+                val e = shouldThrow<IllegalArgumentException> {
+                    category.rebaseWithParent(oldPrefix = "111", newPrefix = "666666")
                 }
-                ex.message.shouldContain("root 카테고리여야합니다")
+
+                e.message.shouldBe("oldPrefix 와 newPrefix 는 동일한 길이를 가져야 합니다.")
             }
         }
 
-        `when`("depth>0 이면서 parentCode == null 인 경우") {
-            then("예외가 발생한다") {
-                val ex = shouldThrow<IllegalArgumentException> {
-                    Category(
-                        id = 1L,
-                        title = "invalid",
-                        depth = 1,
-                        rootCode = "R",
-                        parentCode = null,
-                        code = "C",
-                    )
+        When("oldPrefix가 현재 code의 접두사가 아니면") {
+            val category = Category(title = "111", code = "111222333")
+
+            Then("예외가 발생한다") {
+                val e = shouldThrow<IllegalArgumentException> {
+                    category.rebaseWithParent(oldPrefix = "222", newPrefix = "999")
                 }
-                ex.message.shouldContain("root 카테고리여야합니다")
-            }
-        }
-    }
 
-    given("patch 동작") {
-        `when`("title만 변경하면") {
-            val category = root(title = "before", code = "ROOT").apply {
-                update(title = "after", code = null)
-            }
-
-            then("title만 바뀌어야 한다") {
-                category.title.shouldBe("after")
-                category.code.shouldBe("ROOT")
+                e.message.shouldBe("후손 code 가 아닙니다.")
             }
         }
 
-        `when`("code만 변경하면") {
-            val category = root(title = "title", code = "ROOT").apply {
-                update(title = null, code = "NEW")
-            }
+        When("oldPrefix/newPrefix 자체가 유효한 코드가 아니면") {
+            val c = Category(title = "111", code = "111222333")
 
-            then("code만 바뀌어야 한다") {
-                category.title.shouldBe("title")
-                category.code.shouldBe("NEW")
-            }
-        }
+            Then("예외가 발생한다") {
+                val e1 = shouldThrow<IllegalArgumentException> {
+                    c.rebaseWithParent(oldPrefix = "11A", newPrefix = "999")
+                }
 
-        `when`("title, code 모두 변경하면") {
-            val category = root(title = "before", code = "ROOT").apply {
-                update(title = "after", code = "NEW")
-            }
+                e1.message.shouldBe("code는 숫자만 포함해야 합니다.")
 
-            then("둘 다 바뀌어야 한다") {
-                category.title.shouldBe("after")
-                category.code.shouldBe("NEW")
-            }
-        }
+                val e2 = shouldThrow<IllegalArgumentException> {
+                    c.rebaseWithParent(oldPrefix = "111", newPrefix = "99")
+                }
 
-        `when`("둘 다 null이면") {
-            val category = root(title = "title", code = "ROOT").apply {
-                update(title = null, code = null)
-            }
-
-            then("아무 변화가 없어야 한다") {
-                category.title.shouldBe("title")
-                category.code.shouldBe("ROOT")
-            }
-        }
-    }
-
-    given("updateParentCode 동작") {
-        val parent = root(code = "ROOT")
-        val child = leaf(parent, code = "CHILD")
-
-        `when`("parentCode만 변경하면") {
-            child.updateParentCode("NEW_PARENT")
-
-            then("parentCode만 바뀌고 나머지는 유지된다") {
-                child.parentCode.shouldBe("NEW_PARENT")
-                child.rootCode.shouldBe("ROOT")
-                child.depth.shouldBe(1)
-            }
-        }
-    }
-
-    given("moveWithParent 동작") {
-        `when`("양의 depthGap 으로 이동하면") {
-            val parent = root(code = "ROOT")
-            val child = leaf(parent, code = "CHILD").apply {
-                moveWithParent(newRootCode = "NEW_ROOT", depthGap = 2)
-            }
-
-            then("rootCode가 교체되고 depth가 gap만큼 증가한다") {
-                child.rootCode.shouldBe("NEW_ROOT")
-                child.depth.shouldBe(3) // 1 + 2
-            }
-        }
-
-        `when`("음의 depthGap 으로 이동하면") {
-            val parent = root(code = "ROOT")
-            val child = leaf(parent, code = "CHILD").apply {
-                moveWithParent(newRootCode = "NEW_ROOT", depthGap = -1)
-            }
-
-            then("rootCode가 교체되고 depth가 gap만큼 감소한다") {
-                child.rootCode.shouldBe("NEW_ROOT")
-                child.depth.shouldBe(0) // 1 - 1
-            }
-        }
-    }
-
-    given("moveParent 동작") {
-        `when`("부모를 null로 이동하면(루트로 승격)") {
-            val parent = root(code = "ROOT")
-            val child = leaf(parent, code = "CHILD").apply {
-                moveParent(newParent = null)
-            }
-
-            then("rootCode=자신의 code, depth=0, parentCode=null 이어야 한다") {
-                child.rootCode.shouldBe("CHILD")
-                child.depth.shouldBe(0)
-                child.parentCode.shouldBe(null)
-                child.isRoot.shouldBeTrue()
-            }
-        }
-
-        `when`("다른 부모로 이동하면") {
-            val rootA = root(code = "A")
-            val rootB = root(code = "B")
-            val a1 = leaf(rootA, code = "A1")
-            val b1 = leaf(rootB, code = "B1")
-
-            a1.moveParent(b1)
-
-            then("새 부모 기준으로 rootCode, depth, parentCode가 재설정된다") {
-                a1.rootCode.shouldBe(rootB.rootCode)
-                a1.parentCode.shouldBe(b1.code)
-                a1.depth.shouldBe(b1.depth + 1)
-                a1.isRoot.shouldBeFalse()
+                e2.message.shouldBe("code의 길이는 3의 배수여야 합니다.")
             }
         }
     }
 })
-
-
