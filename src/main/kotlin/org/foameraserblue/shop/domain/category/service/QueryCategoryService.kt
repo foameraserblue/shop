@@ -15,6 +15,7 @@ class QueryCategoryService(
         return categoryAdapter.findAll()
     }
 
+    // 자신 + 후손 카테고리를 가져옵니다.
     override fun getAllMeAndDescendant(code: String): List<Category> {
         val category = categoryAdapter.findByCode(code)
 

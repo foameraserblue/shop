@@ -1,5 +1,7 @@
 package org.foameraserblue.shop.domain.test
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.foameraserblue.shop.domain.category.infrastructure.db.CategoryJpaRepository
 import org.foameraserblue.shop.domain.category.service.usecase.CommandCategoryUseCase
 import org.springframework.web.bind.annotation.PostMapping
@@ -47,12 +49,14 @@ import org.springframework.web.bind.annotation.RestController
         └── 기능성 022027030031
 */
 
+@Tag(name = "테스트 컨트롤러", description = "테스트 전용 컨트롤러")
 @RestController
 @RequestMapping("/test")
 class TestController(
     private val commandCategoryUseCase: CommandCategoryUseCase,
     private val categoryJpaRepository: CategoryJpaRepository,
 ) {
+    @Operation(description = "호출시 모든 데이터를 삭제한 후 테스트 데이터로 insert 합니다.")
     @PostMapping
     fun refreshAndMakeTestData() {
         refreshAllData()

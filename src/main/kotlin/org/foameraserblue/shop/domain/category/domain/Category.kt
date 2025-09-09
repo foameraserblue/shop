@@ -12,16 +12,15 @@ class Category(
     var code: String,
 ) {
     companion object {
-        private val SEGMENT_3DIGIT_REGEX = Regex("\\d{3}")
-
         private fun validateSegment(segment: String) {
-            require(SEGMENT_3DIGIT_REGEX.matches(segment)) { "코드의 세그먼트는 3자리 숫자여야 합니다." }
+            require(segment.length == 3 && segment.all { it.isDigit() }) { "코드의 세그먼트는 3자리 숫자여야 합니다." }
         }
 
         private fun makeCode(parentCode: String, segment: String): String {
             return "$parentCode$segment"
         }
 
+        // 추가되는 리프 카테고리를 생성합니다
         fun createForLeaf(parent: Category, title: String, segment: String): Category {
             validateSegment(segment)
 
@@ -31,6 +30,7 @@ class Category(
             )
         }
 
+        // 추가되는 루트 카테고리를 생성합니다.
         fun createForRoot(title: String, rootSegment: String): Category {
             validateSegment(rootSegment)
 
@@ -81,15 +81,16 @@ class Category(
 
     // 마지막 3자리 세그먼트만 교체합니다(부모 경로는 유지)
     private fun changeMySegment(newSegment: String) {
-        if (newSegment == this.segment) return
+        if (this.segment == newSegment) return
         validateSegment(newSegment)
 
-        val parenCode = this.parentCodeOrEmpty
-        val newCode = makeCode(parenCode, newSegment)
+        val parentCode = this.parentCodeOrEmpty
+        val newCode = makeCode(parentCode, newSegment)
 
         this.code = newCode
     }
 
+    // 부모코드를 rebase 해줍니다.
     fun rebaseWithParent(oldPrefix: String, newPrefix: String) = apply {
         validateCode(oldPrefix)
         validateCode(newPrefix)

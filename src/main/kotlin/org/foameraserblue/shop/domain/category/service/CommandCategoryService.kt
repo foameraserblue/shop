@@ -27,7 +27,7 @@ class CommandCategoryService(
                 Category.createForLeaf(parent = parent, title = title, segment = segmentCode)
             }
 
-        validateCode(category.code)
+        validateExistsCode(category.code)
 
         return categoryAdapter.save(category)
     }
@@ -47,14 +47,16 @@ class CommandCategoryService(
             return categoryAdapter.save(category)
         }
 
-        validateCode(newPrefix)
+        validateExistsCode(newPrefix)
 
+        // 후손 카테고리의 code prefix 를 변경해줍니다
         rebaseDescendants(oldPrefix, newPrefix)
 
         return categoryAdapter.save(category)
 
     }
 
+    // 변경된 prefix 로 후손들의 코드 베이스를 변경해줍니다
     private fun rebaseDescendants(oldPrefix: String, newPrefix: String) {
         val descendants = categoryAdapter
             .findAllByCodeStartingWithAndCodeNot(oldPrefix, oldPrefix)
@@ -64,7 +66,7 @@ class CommandCategoryService(
     }
 
 
-    private fun validateCode(code: String) {
+    private fun validateExistsCode(code: String) {
         require(
             !categoryAdapter.existsByCode(code)
         ) { "이미 해당 code로 저장된 데이터가 존재합니다." }
@@ -72,6 +74,7 @@ class CommandCategoryService(
 
     override fun delete(code: String) {
         val category = categoryAdapter.findByCode(code)
+        // 자신을 포함한 모든 후손들의 데이터를 삭제합니다.
         val meAndAllDescendants = categoryAdapter.findAllByCodeStartingWith(category.code)
 
         categoryAdapter.deleteAll(meAndAllDescendants)
