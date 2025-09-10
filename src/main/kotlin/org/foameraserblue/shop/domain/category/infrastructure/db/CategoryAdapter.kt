@@ -41,7 +41,7 @@ class CategoryAdapter(
         return categoryJpaRepository.existsByCode(code)
     }
 
-    fun deleteAll(categories: List<Category>) {
-        categoryJpaRepository.deleteAll(categories.map { CategoryEntity(it) })
+    fun deleteAllByCodeStartingWith(codePrefix: String) {
+        categoryJpaRepository.deleteAllByCodeStartingWith(codePrefix)
     }
 }

@@ -200,15 +200,13 @@ class CommandCategoryServiceTest : BehaviorSpec({
             )
 
             every { adapter.findByCode("050") } returns me
-            every { adapter.findAllByCodeStartingWith("050") } returns meAndDescendants
-            every { adapter.deleteAll(meAndDescendants) } returns Unit
+            every { adapter.deleteAllByCodeStartingWith("050") } returns Unit
 
             service.delete("050")
 
             Then("본인을 포함한 후손을 조회하여 일괄 삭제한다") {
                 verify(exactly = 1) { adapter.findByCode("050") }
-                verify(exactly = 1) { adapter.findAllByCodeStartingWith("050") }
-                verify(exactly = 1) { adapter.deleteAll(meAndDescendants) }
+                verify(exactly = 1) { adapter.deleteAllByCodeStartingWith("050") }
             }
         }
     }

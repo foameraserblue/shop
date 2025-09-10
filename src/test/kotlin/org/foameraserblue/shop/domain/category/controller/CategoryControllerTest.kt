@@ -108,7 +108,7 @@ class CategoryControllerTest(val mockMvc: MockMvc) : BehaviorSpec({
         When("자식(001002)을 001003(셔츠)로 변경한다") {
             val req = UpdateCategoryRequest(title = "셔츠", newSegmentCode = "003")
 
-            Then("200 OK, code=001003, title=셔츠") {
+            Then("응답 성공") {
                 val mvcRes = mockMvc.perform(
                     put("/categories/{code}", "001002")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -124,7 +124,7 @@ class CategoryControllerTest(val mockMvc: MockMvc) : BehaviorSpec({
         }
 
         When("변경된 결과(001 기준 트리)를 조회한다") {
-            Then("200 OK 및 001003 반영") {
+            Then("응답 성공") {
                 val mvcRes = mockMvc.perform(get("/categories").param("code", "001"))
                     .andExpect(status().isOk)
                     .andReturn()
@@ -140,14 +140,14 @@ class CategoryControllerTest(val mockMvc: MockMvc) : BehaviorSpec({
         }
 
         When("루트(001)를 삭제한다") {
-            Then("200 OK") {
+            Then("응답 성공") {
                 mockMvc.perform(delete("/categories/{code}", "001"))
                     .andExpect(status().isOk)
             }
         }
 
         When("삭제 후 전체 트리를 조회한다") {
-            Then("200 OK 및 001이 더 이상 존재하지 않는다") {
+            Then("응답 성공") {
                 val mvcRes = mockMvc.perform(get("/categories"))
                     .andExpect(status().isOk)
                     .andReturn()

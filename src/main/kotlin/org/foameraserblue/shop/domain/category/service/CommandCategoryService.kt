@@ -74,9 +74,7 @@ class CommandCategoryService(
 
     override fun delete(code: String) {
         val category = categoryAdapter.findByCode(code)
-        // 자신을 포함한 모든 후손들의 데이터를 삭제합니다.
-        val meAndAllDescendants = categoryAdapter.findAllByCodeStartingWith(category.code)
 
-        categoryAdapter.deleteAll(meAndAllDescendants)
+        categoryAdapter.deleteAllByCodeStartingWith(category.code)
     }
 }
