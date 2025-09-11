@@ -2,15 +2,15 @@ package org.foameraserblue.shop.domain.category.service
 
 import org.foameraserblue.shop.domain.category.domain.Category
 import org.foameraserblue.shop.domain.category.infrastructure.db.CategoryAdapter
-import org.foameraserblue.shop.domain.category.service.usecase.CommandCategoryUseCase
+import org.foameraserblue.shop.domain.category.service.usecase.CategoryUseCase
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional
-class CommandCategoryService(
+class CategoryService(
     private val categoryAdapter: CategoryAdapter,
-) : CommandCategoryUseCase {
+) : CategoryUseCase {
     override fun create(
         parentCode: String,
         title: String,

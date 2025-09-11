@@ -2,7 +2,7 @@ package org.foameraserblue.shop.domain.category.service.usecase
 
 import org.foameraserblue.shop.domain.category.domain.Category
 
-interface CommandCategoryUseCase {
+interface CategoryUseCase {
     fun create(
         parentCode: String,
         title: String,

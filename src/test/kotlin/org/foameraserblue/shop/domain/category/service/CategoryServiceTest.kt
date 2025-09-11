@@ -12,13 +12,13 @@ import io.mockk.verify
 import org.foameraserblue.shop.domain.category.domain.Category
 import org.foameraserblue.shop.domain.category.infrastructure.db.CategoryAdapter
 
-class CommandCategoryServiceTest : BehaviorSpec({
+class CategoryServiceTest : BehaviorSpec({
     lateinit var adapter: CategoryAdapter
-    lateinit var service: CommandCategoryService
+    lateinit var service: CategoryService
 
     beforeSpec {
         adapter = mockk(relaxed = true)
-        service = CommandCategoryService(adapter)
+        service = CategoryService(adapter)
     }
 
     beforeContainer {

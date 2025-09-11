@@ -3,7 +3,7 @@ package org.foameraserblue.shop.domain.test
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.foameraserblue.shop.domain.category.infrastructure.db.CategoryJpaRepository
-import org.foameraserblue.shop.domain.category.service.usecase.CommandCategoryUseCase
+import org.foameraserblue.shop.domain.category.service.usecase.CategoryUseCase
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -53,7 +53,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/test")
 class TestController(
-    private val commandCategoryUseCase: CommandCategoryUseCase,
+    private val categoryUseCase: CategoryUseCase,
     private val categoryJpaRepository: CategoryJpaRepository,
 ) {
     @Operation(description = "호출시 모든 데이터를 삭제한 후 테스트 데이터로 insert 합니다.")
@@ -74,7 +74,7 @@ class TestController(
         // 루트 생성: parentCode="" 로 전달, 반환값은 풀 경로 코드(=세그먼트)
         fun createRoot(title: String): String {
             val seg = nextSegment()
-            commandCategoryUseCase.create(
+            categoryUseCase.create(
                 parentCode = "",
                 title = title,
                 segmentCode = seg
@@ -85,7 +85,7 @@ class TestController(
         // 자식 생성: parentPath 는 부모의 풀 경로 코드, 반환값은 자식의 풀 경로 코드
         fun createChild(parentPath: String, title: String): String {
             val seg = nextSegment()
-            commandCategoryUseCase.create(
+            categoryUseCase.create(
                 parentCode = parentPath,
                 title = title,
                 segmentCode = seg

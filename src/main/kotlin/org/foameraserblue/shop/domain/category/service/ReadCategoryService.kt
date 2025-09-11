@@ -2,15 +2,15 @@ package org.foameraserblue.shop.domain.category.service
 
 import org.foameraserblue.shop.domain.category.domain.Category
 import org.foameraserblue.shop.domain.category.infrastructure.db.CategoryAdapter
-import org.foameraserblue.shop.domain.category.service.usecase.QueryCategoryUseCase
+import org.foameraserblue.shop.domain.category.service.usecase.ReadCategoryUseCase
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
-class QueryCategoryService(
+class ReadCategoryService(
     private val categoryAdapter: CategoryAdapter,
-) : QueryCategoryUseCase {
+) : ReadCategoryUseCase {
     override fun getAll(): List<Category> {
         return categoryAdapter.findAll()
     }

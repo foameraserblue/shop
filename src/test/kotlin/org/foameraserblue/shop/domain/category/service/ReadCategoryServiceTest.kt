@@ -11,13 +11,13 @@ import org.foameraserblue.shop.common.exception.NotFoundException
 import org.foameraserblue.shop.domain.category.domain.Category
 import org.foameraserblue.shop.domain.category.infrastructure.db.CategoryAdapter
 
-class QueryCategoryServiceTest : BehaviorSpec({
+class ReadCategoryServiceTest : BehaviorSpec({
     lateinit var adapter: CategoryAdapter
-    lateinit var service: QueryCategoryService
+    lateinit var service: ReadCategoryService
 
     beforeSpec {
         adapter = mockk(relaxed = true)
-        service = QueryCategoryService(adapter)
+        service = ReadCategoryService(adapter)
     }
 
     beforeContainer {
